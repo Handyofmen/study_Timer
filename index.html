@@ -9,226 +9,153 @@
 <meta name="apple-mobile-web-app-title" content="Study Timer"/>
 <meta name="description" content="Andy's 90-Day Enterprise Tech Study Timer"/>
 <title>90-Day Study Timer — Andy</title>
-
 <link rel="manifest" id="manifestLink"/>
-
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --navy:    #1B3A6B;
-    --blue:    #2563EB;
-    --sky:     #DBEAFE;
-    --teal:    #0D9488;
-    --teallt:  #CCFBF1;
-    --orange:  #EA580C;
-    --orangelt:#FFF7ED;
-    --gray:    #374151;
-    --graylt:  #F3F4F6;
-    --graymd:  #E5E7EB;
-    --white:   #ffffff;
-    --green:   #16A34A;
-    --greenlt: #DCFCE7;
-    --red:     #DC2626;
-    --redlt:   #FEE2E2;
-    --text:    #111827;
-    --textmd:  #6B7280;
-    --surface: #F9FAFB;
-    --card:    #ffffff;
-    --border:  #E5E7EB;
+    --navy:#1B3A6B;--blue:#2563EB;--sky:#DBEAFE;--teal:#0D9488;--teallt:#CCFBF1;
+    --orange:#EA580C;--orangelt:#FFF7ED;--gray:#374151;--graylt:#F3F4F6;--graymd:#E5E7EB;
+    --white:#ffffff;--green:#16A34A;--greenlt:#DCFCE7;--red:#DC2626;--redlt:#FEE2E2;
+    --text:#111827;--textmd:#6B7280;--surface:#F9FAFB;--card:#ffffff;--border:#E5E7EB;
   }
-
   @media (prefers-color-scheme: dark) {
     :root {
-      --navy:   #93B4E8;
-      --blue:   #60A5FA;
-      --sky:    #1E3A5F;
-      --teal:   #2DD4BF;
-      --teallt: #0F3530;
-      --orange: #FB923C;
-      --orangelt:#3A1F0A;
-      --gray:   #D1D5DB;
-      --graylt: #1F2937;
-      --graymd: #374151;
-      --white:  #111827;
-      --green:  #4ADE80;
-      --greenlt:#052E16;
-      --red:    #F87171;
-      --redlt:  #450A0A;
-      --text:   #F9FAFB;
-      --textmd: #9CA3AF;
-      --surface:#111827;
-      --card:   #1F2937;
-      --border: #374151;
+      --navy:#93B4E8;--blue:#60A5FA;--sky:#1E3A5F;--teal:#2DD4BF;--teallt:#0F3530;
+      --orange:#FB923C;--orangelt:#3A1F0A;--gray:#D1D5DB;--graylt:#1F2937;--graymd:#374151;
+      --white:#111827;--green:#4ADE80;--greenlt:#052E16;--red:#F87171;--redlt:#450A0A;
+      --text:#F9FAFB;--textmd:#9CA3AF;--surface:#111827;--card:#1F2937;--border:#374151;
     }
   }
+  html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .container{width:100%;max-width:500px;}
+  .header{text-align:center;margin-bottom:18px;}
+  .header h1{color:#fff;font-size:20px;font-weight:600;letter-spacing:0.5px;}
+  .header p{color:#CCFBF1;font-size:13px;margin-top:4px;}
+  .card{background:var(--card);border-radius:20px;padding:24px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.28);}
 
-  html, body {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1B3A6B 0%, #0D9488 100%);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    color: var(--text);
-  }
-
-  .wrap {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .container { width: 100%; max-width: 500px; }
-
-  .header { text-align: center; margin-bottom: 18px; }
-  .header h1 { color: #fff; font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
-  .header p  { color: #CCFBF1; font-size: 13px; margin-top: 4px; }
-
-  .card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 24px 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.28);
-  }
+  /* Duration picker */
+  .duration-section{margin-bottom:16px;}
+  .duration-label{font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:8px;}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .preset-btn{background:var(--surface);color:var(--textmd);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+  .preset-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
+  .preset-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .custom-row{display:flex;align-items:center;gap:8px;}
+  .custom-row label{font-size:11px;color:var(--textmd);white-space:nowrap;}
+  .custom-row input{width:65px;padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;text-align:center;outline:none;font-family:inherit;}
+  .custom-row input:focus{border-color:var(--navy);}
+  .set-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .set-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
 
   /* Day row */
-  .day-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px; }
-  .day-box label { display: block; font-size: 11px; font-weight: 600; color: var(--textmd); margin-bottom: 4px; letter-spacing: 0.5px; }
-  .day-box input {
-    width: 68px; padding: 8px 6px;
-    border-radius: 10px; border: 1.5px solid var(--border);
-    background: var(--surface); color: var(--text);
-    font-size: 20px; font-weight: 600; text-align: center;
-    outline: none;
-  }
-  .day-box input:focus { border-color: var(--navy); }
-  .goal-box {
-    flex: 1; background: var(--surface); border-radius: 10px;
-    padding: 9px 12px; min-height: 54px;
-  }
-  .goal-box .glabel { font-size: 11px; font-weight: 600; color: var(--textmd); letter-spacing: 0.5px; margin-bottom: 3px; }
-  .goal-box .gtext  { font-size: 12px; color: var(--text); line-height: 1.45; }
+  .day-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;}
+  .day-box label{display:block;font-size:11px;font-weight:600;color:var(--textmd);margin-bottom:4px;letter-spacing:0.5px;}
+  .day-box input{width:68px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:20px;font-weight:600;text-align:center;outline:none;}
+  .day-box input:focus{border-color:var(--navy);}
+  .goal-box{flex:1;background:var(--surface);border-radius:10px;padding:9px 12px;min-height:54px;}
+  .goal-box .glabel{font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:3px;}
+  .goal-box .gtext{font-size:12px;color:var(--text);line-height:1.45;}
 
-  /* Phase pills */
-  .pills { display: flex; gap: 8px; margin-bottom: 20px; }
-  .pill {
-    flex: 1; text-align: center; border-radius: 10px;
-    padding: 9px 4px; border: 1.5px solid transparent; transition: all 0.3s;
-  }
-  .pill.idle     { background: var(--surface); border-color: var(--border); }
-  .pill.active   { border-color: var(--pill-c); background: var(--pill-c); }
-  .pill.done     { background: var(--pill-lt); border-color: var(--pill-c); }
-  .pill .plabel  { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
-  .pill .pmins   { font-size: 19px; font-weight: 600; margin: 2px 0; }
-  .pill .pdesc   { font-size: 10px; }
+  /* Pills */
+  .pills{display:flex;gap:8px;margin-bottom:20px;}
+  .pill{flex:1;text-align:center;border-radius:10px;padding:9px 4px;border:1.5px solid transparent;transition:all 0.3s;}
+  .pill.idle{background:var(--surface);border-color:var(--border);}
+  .pill.active{border-color:var(--pill-c);background:var(--pill-c);}
+  .pill.done{background:var(--pill-lt);border-color:var(--pill-c);}
+  .pill .plabel{font-size:10px;font-weight:700;letter-spacing:0.5px;}
+  .pill .pmins{font-size:19px;font-weight:600;margin:2px 0;}
 
   /* Clock */
-  .clock-wrap { display: flex; justify-content: center; margin-bottom: 14px; position: relative; }
-  .clock-svg  { display: block; }
-  .clock-center {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    pointer-events: none;
-  }
-  .clock-time  { font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
-  .clock-sub   { font-size: 11px; color: var(--textmd); margin-top: 3px; }
-  .clock-over  { font-size: 11px; font-weight: 700; color: var(--red); margin-top: 2px; min-height: 14px; }
+  .clock-wrap{display:flex;justify-content:center;margin-bottom:14px;position:relative;}
+  .clock-svg{display:block;}
+  .clock-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+  .clock-time{font-size:40px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+  .clock-sub{font-size:11px;color:var(--textmd);margin-top:3px;}
+  .clock-over{font-size:11px;font-weight:700;color:var(--red);margin-top:2px;min-height:14px;}
 
   /* Progress bar */
-  .prog-wrap { margin-bottom: 6px; }
-  .prog-track { height: 5px; background: var(--graymd); border-radius: 4px; overflow: hidden; }
-  .prog-fill  { height: 100%; border-radius: 4px; background: var(--navy); width: 0%; transition: width 0.8s ease; }
-  .prog-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--textmd); margin-top: 4px; }
+  .prog-wrap{margin-bottom:6px;}
+  .prog-track{height:5px;background:var(--graymd);border-radius:4px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:4px;background:var(--navy);width:0%;transition:width 0.8s ease;}
+  .prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--textmd);margin-top:4px;}
 
-  /* Warn / done boxes */
-  .warn-box {
-    background: var(--redlt); color: var(--red);
-    border: 1px solid var(--red); border-radius: 10px;
-    padding: 10px 14px; font-size: 13px; font-weight: 600;
-    text-align: center; margin: 8px 0; display: none;
-  }
-  .done-box {
-    background: var(--greenlt); color: var(--green);
-    border: 1px solid var(--green); border-radius: 10px;
-    padding: 12px 16px; font-size: 13px; margin: 8px 0; display: none;
-  }
+  /* Warn/done */
+  .warn-box{background:var(--redlt);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;display:none;}
+  .done-box{background:var(--greenlt);color:var(--green);border:1px solid var(--green);border-radius:10px;padding:12px 16px;font-size:13px;margin:8px 0;display:none;}
 
   /* Controls */
-  .controls { display: flex; gap: 8px; margin: 12px 0; }
-  .btn {
-    padding: 13px 16px; border-radius: 10px;
-    border: 1.5px solid var(--border);
-    background: var(--card); color: var(--text);
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    font-family: inherit;
-  }
-  .btn:hover   { background: var(--surface); }
-  .btn:active  { transform: scale(0.97); }
-  .btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
-  .btn.primary:hover { filter: brightness(1.1); }
-  .btn.accent  { background: var(--teal); color: #fff; border-color: var(--teal); }
-  .btn.accent:hover { filter: brightness(1.1); }
+  .controls{display:flex;gap:8px;margin:12px 0;}
+  .btn{padding:13px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s,transform 0.1s;font-family:inherit;}
+  .btn:hover{background:var(--surface);}
+  .btn:active{transform:scale(0.97);}
+  .btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .btn.primary:hover{filter:brightness(1.1);}
+  .btn.accent{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .btn.accent:hover{filter:brightness(1.1);}
 
   /* Note */
-  .note-area { display: none; margin-bottom: 12px; }
-  .note-area label { display: block; font-size: 11px; font-weight: 600; color: var(--textmd); letter-spacing: 0.5px; margin-bottom: 5px; }
-  .note-area textarea {
-    width: 100%; border-radius: 10px;
-    border: 1.5px solid var(--border);
-    background: var(--surface); color: var(--text);
-    padding: 10px 12px; font-size: 13px; resize: none;
-    font-family: inherit; outline: none;
-  }
-  .note-area textarea:focus { border-color: var(--teal); }
+  .note-area{display:none;margin-bottom:12px;}
+  .note-area label{display:block;font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:5px;}
+  .note-area textarea{width:100%;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:10px 12px;font-size:13px;resize:none;font-family:inherit;outline:none;}
+  .note-area textarea:focus{border-color:var(--teal);}
+
+  /* Today stats bar */
+  .stats-bar{display:flex;gap:8px;margin:12px 0 0 0;}
+  .stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;}
+  .stat-card .sv{font-size:20px;font-weight:700;color:var(--navy);}
+  .stat-card .sl{font-size:10px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-top:2px;}
 
   /* Log */
-  .log-section { margin-top: 14px; display: none; }
-  .log-header  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .log-title   { font-size: 11px; font-weight: 700; color: var(--textmd); letter-spacing: 0.5px; }
-  .log-list    { display: none; border: 1px solid var(--border); border-radius: 10px; max-height: 180px; overflow-y: auto; }
-  .log-row     { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 12px; border-bottom: 1px solid var(--border); gap: 8px; }
-  .log-row:last-child { border-bottom: none; }
-  .log-day     { font-size: 13px; font-weight: 600; color: var(--text); }
-  .log-note    { font-size: 11px; color: var(--textmd); margin-top: 2px; font-style: italic; }
-  .log-time    { font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .log-section{margin-top:14px;display:none;}
+  .log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .log-title{font-size:11px;font-weight:700;color:var(--textmd);letter-spacing:0.5px;}
+  .log-list{display:none;border:1px solid var(--border);border-radius:10px;max-height:200px;overflow-y:auto;}
+  .log-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border);gap:8px;}
+  .log-row:last-child{border-bottom:none;}
+  .log-day{font-size:13px;font-weight:600;color:var(--text);}
+  .log-note{font-size:11px;color:var(--textmd);margin-top:2px;font-style:italic;}
+  .log-time{font-size:13px;font-weight:700;white-space:nowrap;}
 
-  /* Bottom legend */
-  .legend { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 16px; }
-  .legend-item { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 9px 10px; text-align: center; }
-  .legend-item .li-label { color: #fff; font-size: 11px; font-weight: 700; }
-  .legend-item .li-desc  { color: #CCFBF1; font-size: 10px; margin-top: 2px; }
+  /* Legend */
+  .legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
+  .legend-item{background:rgba(255,255,255,0.15);border-radius:10px;padding:9px 10px;text-align:center;}
+  .legend-item .li-label{color:#fff;font-size:11px;font-weight:700;}
+  .legend-item .li-desc{color:#CCFBF1;font-size:10px;margin-top:2px;}
+  .footer{text-align:center;margin-top:12px;color:rgba(255,255,255,0.55);font-size:11px;}
 
-  .footer { text-align: center; margin-top: 12px; color: rgba(255,255,255,0.55); font-size: 11px; }
-
-  /* PWA install banner */
-  #installBanner {
-    display: none; position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--navy); color: #fff;
-    padding: 14px 20px; text-align: center;
-    font-size: 14px; font-weight: 500;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
-    z-index: 999;
-  }
-  #installBanner button {
-    margin-left: 12px; padding: 6px 16px;
-    background: var(--teal); color: #fff; border: none;
-    border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;
-  }
-  #installBanner .dismiss { margin-left: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.4); }
+  #installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;padding:14px 20px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:999;}
+  #installBanner button{margin-left:12px;padding:6px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
+  #installBanner .dismiss{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.4);}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="container">
-
     <div class="header">
       <h1>⏱ 90-Day Study Timer</h1>
-      <p>Andy's Enterprise Tech Mastery &nbsp;·&nbsp; 60 min / day</p>
+      <p>Andy's Enterprise Tech Mastery &nbsp;·&nbsp; Flexible focus sessions</p>
     </div>
 
     <div class="card">
+
+      <!-- Duration Picker -->
+      <div class="duration-section">
+        <div class="duration-label">SESSION DURATION</div>
+        <div class="presets" id="presetBtns">
+          <button class="preset-btn" onclick="setPreset(25)">25 min</button>
+          <button class="preset-btn" onclick="setPreset(45)">45 min</button>
+          <button class="preset-btn active" onclick="setPreset(60)">60 min</button>
+          <button class="preset-btn" onclick="setPreset(90)">90 min</button>
+          <button class="preset-btn" onclick="setPreset(120)">120 min</button>
+        </div>
+        <div class="custom-row">
+          <label>Custom:</label>
+          <input type="number" id="customMin" min="1" max="480" placeholder="mins"/>
+          <button class="set-btn" onclick="applyCustom()">Set</button>
+        </div>
+      </div>
+
       <!-- Day + Goal -->
       <div class="day-row">
         <div class="day-box">
@@ -260,7 +187,7 @@
         </svg>
         <div class="clock-center">
           <div class="clock-time" id="clockFace">00:00</div>
-          <div class="clock-sub"  id="clockSub">READY</div>
+          <div class="clock-sub" id="clockSub">READY</div>
           <div class="clock-over" id="clockOver"></div>
         </div>
       </div>
@@ -268,20 +195,24 @@
       <!-- Progress bar -->
       <div class="prog-wrap">
         <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-        <div class="prog-labels"><span>0</span><span>15m</span><span>30m</span><span>45m</span><span>60m</span></div>
+        <div class="prog-labels" id="progLabels"><span>0</span><span>15m</span><span>30m</span><span>45m</span><span>60m</span></div>
       </div>
 
-      <!-- Warn / Done -->
       <div class="warn-box" id="warnBox"></div>
       <div class="done-box" id="doneBox"></div>
 
-      <!-- Controls -->
       <div class="controls" id="controls"></div>
 
-      <!-- Note -->
       <div class="note-area" id="noteArea">
         <label>DAILY REFLECTION (fill during Document phase)</label>
         <textarea id="noteInput" rows="2" placeholder="What did I build? Why does this feature matter for my career?"></textarea>
+      </div>
+
+      <!-- Today Stats -->
+      <div class="stats-bar">
+        <div class="stat-card"><div class="sv" id="statSessions">0</div><div class="sl">TODAY'S SESSIONS</div></div>
+        <div class="stat-card"><div class="sv" id="statMins">0</div><div class="sl">TOTAL MINS</div></div>
+        <div class="stat-card"><div class="sv" id="statStreak">0</div><div class="sl">DAY STREAK</div></div>
       </div>
 
       <!-- Log -->
@@ -295,15 +226,14 @@
     </div>
 
     <div class="legend">
-      <div class="legend-item"><div class="li-label">INPUT</div><div class="li-desc">15 min · watch/read</div></div>
-      <div class="legend-item"><div class="li-label">BUILD</div><div class="li-desc">30 min · implement</div></div>
-      <div class="legend-item"><div class="li-label">DOCUMENT</div><div class="li-desc">15 min · reflect</div></div>
+      <div class="legend-item"><div class="li-label">INPUT</div><div class="li-desc">watch/read</div></div>
+      <div class="legend-item"><div class="li-label">BUILD</div><div class="li-desc">implement</div></div>
+      <div class="legend-item"><div class="li-label">DOCUMENT</div><div class="li-desc">reflect</div></div>
     </div>
-    <div class="footer">60 min target &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
+    <div class="footer">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
   </div>
 </div>
 
-<!-- PWA Install Banner -->
 <div id="installBanner">
   📲 Add this timer to your home screen for quick access
   <button id="installBtn">Install</button>
@@ -311,12 +241,12 @@
 </div>
 
 <script>
-const PHASES = [
-  { id:"input",    label:"Input",    mins:15, color:"#2563EB", light:"#DBEAFE" },
-  { id:"build",    label:"Build",    mins:30, color:"#0D9488", light:"#CCFBF1" },
-  { id:"document", label:"Document", mins:15, color:"#EA580C", light:"#FFF7ED" },
+const PHASES=[
+  {id:"input",   label:"Input",   mins:15,color:"#2563EB",light:"#DBEAFE"},
+  {id:"build",   label:"Build",   mins:30,color:"#0D9488",light:"#CCFBF1"},
+  {id:"document",label:"Document",mins:15,color:"#EA580C",light:"#FFF7ED"},
 ];
-const TOTAL=3600, HARDCAP=5400;
+const HARDCAP=5400;
 const GOALS={
   1:"Slack: workspace setup, channel architecture, pin a message",
   2:"Slack: master threads, emoji reactions, save/bookmark",
@@ -356,11 +286,52 @@ const GOALS={
   90:"Final: upload all certification badges to LinkedIn — you're done!",
 };
 
-let elapsed=0, phaseElapsed=0, phase=0, running=false, timer=null;
-let sessions = JSON.parse(localStorage.getItem("andySessions")||"[]");
+let customDuration=60; // default 60 min
+let TOTAL=customDuration*60;
+let elapsed=0,phaseElapsed=0,phase=0,running=false,timer=null;
+let sessions=JSON.parse(localStorage.getItem("andySessions")||"[]");
 
 const fmt=s=>{const m=String(Math.floor(Math.abs(s)/60)).padStart(2,"0"),sec=String(Math.abs(s)%60).padStart(2,"0");return(s<0?"-":"")+m+":"+sec;};
 const $=id=>document.getElementById(id);
+
+function setPreset(mins){
+  if(running)return;
+  customDuration=mins;
+  TOTAL=mins*60;
+  document.querySelectorAll(".preset-btn").forEach(b=>b.classList.toggle("active",b.textContent.trim()===mins+" min"));
+  $("customMin").value="";
+  updateProgLabels();
+  resetUI();
+}
+
+function applyCustom(){
+  if(running)return;
+  const val=parseInt($("customMin").value);
+  if(!val||val<1||val>480){alert("Please enter a duration between 1 and 480 minutes.");return;}
+  customDuration=val;
+  TOTAL=val*60;
+  document.querySelectorAll(".preset-btn").forEach(b=>b.classList.remove("active"));
+  updateProgLabels();
+  resetUI();
+}
+
+function updateProgLabels(){
+  const half=Math.round(customDuration/2);
+  const q1=Math.round(customDuration/4);
+  const q3=Math.round(customDuration*3/4);
+  $("progLabels").innerHTML=`<span>0</span><span>${q1}m</span><span>${half}m</span><span>${q3}m</span><span>${customDuration}m</span>`;
+}
+
+function resetUI(){
+  elapsed=0;phaseElapsed=0;
+  $("clockFace").textContent=fmt(0);
+  $("clockSub").textContent="READY";
+  $("clockOver").textContent="";
+  $("outerRing").style.strokeDashoffset=628.3;
+  $("innerRing").style.strokeDashoffset=477.5;
+  $("progFill").style.width="0%";
+  $("warnBox").style.display="none";
+}
 
 function getDay(){return Math.max(1,Math.min(90,parseInt($("dayInput").value)||1));}
 
@@ -370,9 +341,9 @@ function updateGoal(){
 }
 
 function renderPills(){
-  const el=$("phasePills"); el.innerHTML="";
+  const el=$("phasePills");el.innerHTML="";
   PHASES.forEach((p,i)=>{
-    const n=i+1, isActive=phase===n, isDone=phase>n||phase===4;
+    const n=i+1,isActive=phase===n,isDone=phase>n||phase===4;
     const div=document.createElement("div");
     div.className="pill "+(isActive?"active":isDone?"done":"idle");
     div.style.setProperty("--pill-c",p.color);
@@ -384,7 +355,7 @@ function renderPills(){
 }
 
 function renderControls(){
-  const c=$("controls"); c.innerHTML="";
+  const c=$("controls");c.innerHTML="";
   const mk=(txt,cls,fn,flex=false)=>{const b=document.createElement("button");b.className="btn "+cls;if(flex)b.style.flex="1";b.textContent=txt;b.onclick=fn;c.appendChild(b);};
   if(phase===0){
     mk("▶  Start day "+getDay()+" session","primary",startSession,true);
@@ -410,25 +381,25 @@ function updateUI(){
   $("outerRing").style.stroke=elapsed>TOTAL?"#DC2626":"#1B3A6B";
   if(cp){const ip=Math.min(phaseElapsed/pSecs,1);$("innerRing").style.strokeDashoffset=477.5*(1-ip);$("innerRing").style.stroke=cp.color;}
   else{$("innerRing").style.strokeDashoffset=477.5;}
-  const pf=$("progFill"); pf.style.width=Math.min(op*100,100)+"%"; pf.style.background=elapsed>TOTAL?"#DC2626":"#1B3A6B";
+  const pf=$("progFill");pf.style.width=Math.min(op*100,100)+"%";pf.style.background=elapsed>TOTAL?"#DC2626":"#1B3A6B";
   const wb=$("warnBox");
-  if(elapsed>TOTAL&&phase!==4){wb.style.display="block";wb.textContent=elapsed>=HARDCAP?"Session stopped at 90-minute hard cap.":"⚠  Over 60-minute target. Maximum allowed: 90 minutes.";}
+  if(elapsed>TOTAL&&phase!==4){wb.style.display="block";wb.textContent=elapsed>=HARDCAP?"Session stopped at 90-minute hard cap.":"⚠  Over target. Maximum allowed: 90 minutes.";}
   else wb.style.display="none";
-  renderPills(); renderControls();
+  renderPills();renderControls();
 }
 
 function tick(){
   if(!running)return;
-  elapsed++; phaseElapsed++;
+  elapsed++;phaseElapsed++;
   if(elapsed>=HARDCAP){elapsed=HARDCAP;running=false;finishSession();updateUI();return;}
   updateUI();
   timer=setTimeout(tick,1000);
 }
 
 function startSession(){
-  clearTimeout(timer); elapsed=0; phaseElapsed=0; phase=1; running=true;
-  $("noteArea").style.display="block"; $("doneBox").style.display="none";
-  updateUI(); tick();
+  clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=1;running=true;
+  $("noteArea").style.display="block";$("doneBox").style.display="none";
+  updateUI();tick();
 }
 
 function nextPhase(){
@@ -437,73 +408,76 @@ function nextPhase(){
 }
 
 function finishSession(){
-  phase=4; running=false; clearTimeout(timer);
-  const mins=Math.round(elapsed/60), note=$("noteInput").value;
-  const s={day:getDay(),date:new Date().toLocaleDateString(),mins,note};
+  phase=4;running=false;clearTimeout(timer);
+  const mins=Math.round(elapsed/60),note=$("noteInput").value;
+  const s={day:getDay(),date:new Date().toLocaleDateString(),dateStr:new Date().toDateString(),mins,note,duration:customDuration};
   sessions.push(s);
   try{localStorage.setItem("andySessions",JSON.stringify(sessions));}catch(e){}
-  const db=$("doneBox"); db.style.display="block";
-  db.innerHTML="<strong>Day "+s.day+" complete!</strong> Total: "+mins+" min "+(mins<=60?"✓ on target":"— over target")+(note?'<br><em style="font-size:11px;display:block;margin-top:4px;">"'+note+'"</em>':"");
-  renderLogSection(); updateUI();
+  const db=$("doneBox");db.style.display="block";
+  db.innerHTML="<strong>Day "+s.day+" complete!</strong> Total: "+mins+" min "+(mins<=customDuration?"✓ on target":"— over target")+(note?'<br><em style="font-size:11px;display:block;margin-top:4px;">"'+note+'"</em>':"");
+  renderLogSection();renderStats();updateUI();
 }
 
 function reset(){
-  clearTimeout(timer); elapsed=0; phaseElapsed=0; phase=0; running=false;
-  $("noteInput").value=""; $("noteArea").style.display="none";
-  $("doneBox").style.display="none"; $("warnBox").style.display="none";
+  clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=0;running=false;
+  $("noteInput").value="";$("noteArea").style.display="none";
+  $("doneBox").style.display="none";$("warnBox").style.display="none";
   updateUI();
+}
+
+function renderStats(){
+  const today=new Date().toDateString();
+  const todaySess=sessions.filter(s=>s.dateStr===today);
+  $("statSessions").textContent=todaySess.length;
+  $("statMins").textContent=todaySess.reduce((a,s)=>a+s.mins,0);
+  $("statStreak").textContent=calcStreak();
+}
+
+function calcStreak(){
+  if(!sessions.length)return 0;
+  const days=[...new Set(sessions.map(s=>s.dateStr))];
+  let streak=0;
+  const today=new Date();
+  for(let i=0;i<365;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    if(days.includes(d.toDateString()))streak++;
+    else break;
+  }
+  return streak;
 }
 
 function renderLogSection(){
   if(!sessions.length){$("logSection").style.display="none";return;}
   $("logSection").style.display="block";
   $("toggleLog").onclick=()=>{const l=$("logList"),show=l.style.display==="none";l.style.display=show?"block":"none";$("toggleLog").textContent=show?"hide log":"show log";};
-  const list=$("logList"); list.innerHTML="";
+  const list=$("logList");list.innerHTML="";
   sessions.slice().reverse().forEach(s=>{
-    const row=document.createElement("div"); row.className="log-row";
-    row.innerHTML='<div><div class="log-day">Day '+s.day+' &nbsp;·&nbsp; '+s.date+'</div>'+(s.note?'<div class="log-note">'+s.note.slice(0,60)+(s.note.length>60?"…":"")+'</div>':"")+
-    '</div><div class="log-time" style="color:'+(s.mins<=60?"var(--green)":"var(--red)")+'">'+s.mins+'m</div>';
+    const row=document.createElement("div");row.className="log-row";
+    row.innerHTML='<div><div class="log-day">Day '+s.day+' &nbsp;·&nbsp; '+s.date+(s.duration&&s.duration!==60?' &nbsp;·&nbsp; '+s.duration+'min session':'')+'</div>'+(s.note?'<div class="log-note">'+s.note.slice(0,60)+(s.note.length>60?"…":"")+'</div>':"")+
+    '</div><div class="log-time" style="color:'+(s.mins<=(s.duration||60)?"var(--green)":"var(--red)")+'">'+s.mins+'m</div>';
     list.appendChild(row);
   });
 }
 
 $("dayInput").addEventListener("change",()=>{reset();updateGoal();});
 
-// ── PWA: Service Worker + Install prompt ──────────────────────────
-// Inline manifest via data URI
-const manifest={name:"90-Day Study Timer",short_name:"Study Timer",description:"Andy's Enterprise Tech Mastery Timer",start_url:"./90Day_Timer_Andy.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
+// PWA
+const manifest={name:"90-Day Study Timer",short_name:"Study Timer",description:"Andy's Enterprise Tech Mastery Timer",start_url:"./index.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
 const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
 document.getElementById("manifestLink").href=URL.createObjectURL(blob);
-
-// Service worker for offline support
 if("serviceWorker" in navigator){
-  const swCode=`
-    const CACHE="study-timer-v1";
-    self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll([self.location.pathname]))));
-    self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(self.location.pathname)))));
-  `;
+  const swCode=`const CACHE="study-timer-v2";self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll([self.location.pathname]))));self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(self.location.pathname)))));`;
   const swBlob=new Blob([swCode],{type:"application/javascript"});
-  const swUrl=URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 }
-
-// Install prompt (Chrome/Edge)
 let deferredPrompt=null;
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault(); deferredPrompt=e;
-  $("installBanner").style.display="block";
-});
-$("installBtn").onclick=async()=>{
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  const{outcome}=await deferredPrompt.userChoice;
-  deferredPrompt=null; $("installBanner").style.display="none";
-};
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBanner").style.display="block";});
+$("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;$("installBanner").style.display="none";};
 $("dismissBtn").onclick=()=>{$("installBanner").style.display="none";};
 window.addEventListener("appinstalled",()=>{$("installBanner").style.display="none";});
 
 // Init
-renderLogSection(); updateGoal(); updateUI();
+updateProgLabels();renderLogSection();renderStats();updateGoal();updateUI();
 </script>
 </body>
 </html>
