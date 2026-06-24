@@ -289,6 +289,7 @@ const GOALS={
 let customDuration=60; // default 60 min
 let TOTAL=customDuration*60;
 let elapsed=0,phaseElapsed=0,phase=0,running=false,timer=null;
+let startTimestamp=null,startElapsed=0,startPhaseElapsed=0;
 let sessions=JSON.parse(localStorage.getItem("andySessions")||"[]");
 
 const fmt=s=>{const m=String(Math.floor(Math.abs(s)/60)).padStart(2,"0"),sec=String(Math.abs(s)%60).padStart(2,"0");return(s<0?"-":"")+m+":"+sec;};
@@ -360,7 +361,12 @@ function renderControls(){
   if(phase===0){
     mk("▶  Start day "+getDay()+" session","primary",startSession,true);
   } else if(phase>=1&&phase<=3){
-    mk(running?"⏸  Pause":"▶  Resume","",()=>{running=!running;if(running)tick();renderControls();},true);
+    mk(running?"⏸  Pause":"▶  Resume","",()=>{
+      running=!running;
+      if(running){startTimestamp=Date.now();startElapsed=elapsed;startPhaseElapsed=phaseElapsed;tick();}
+      else{clearTimeout(timer);}
+      renderControls();
+    },true);
     mk(phase<3?"Next: "+PHASES[phase].label+" →":"✓  Finish session","accent",nextPhase,true);
     mk("↺","",reset);
   } else if(phase===4){
@@ -390,21 +396,25 @@ function updateUI(){
 
 function tick(){
   if(!running)return;
-  elapsed++;phaseElapsed++;
+  const now=Date.now();
+  const delta=Math.floor((now-startTimestamp)/1000);
+  elapsed=startElapsed+delta;
+  phaseElapsed=startPhaseElapsed+delta;
   if(elapsed>=HARDCAP){elapsed=HARDCAP;running=false;finishSession();updateUI();return;}
   updateUI();
-  timer=setTimeout(tick,1000);
+  timer=setTimeout(tick,250);
 }
 
 function startSession(){
   clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=1;running=true;
+  startTimestamp=Date.now();startElapsed=0;startPhaseElapsed=0;
   $("noteArea").style.display="block";$("doneBox").style.display="none";
   updateUI();tick();
 }
 
 function nextPhase(){
-  if(phase<3){phase++;phaseElapsed=0;updateUI();}
-  else{running=false;finishSession();}
+  if(phase<3){phase++;phaseElapsed=0;startPhaseElapsed=0;startTimestamp=Date.now();startElapsed=elapsed;updateUI();}
+  else{running=false;clearTimeout(timer);finishSession();}
 }
 
 function finishSession(){
