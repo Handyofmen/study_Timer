@@ -168,6 +168,9 @@
           <input type="number" id="customMin" min="1" max="480" placeholder="mins"/>
           <button class="set-btn" onclick="applyCustom()">Set</button>
         </div>
+        <div style="margin-top:8px;">
+          <button class="set-btn" onclick="testSound()" style="width:100%;text-align:center;padding:7px;">🔔 Test Sound</button>
+        </div>
       </div>
 
       <!-- Day + Goal -->
@@ -319,17 +322,27 @@ let warned5min=false,playedEnd=false,overtimeBeepInterval=null;
 
 // ── Sound Engine ──────────────────────────────────────────────────
 let audioCtx=null;
-function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
 function playTone(freq,type,duration,gain,delay){
   try{
-    const ctx=getAudio(),osc=ctx.createOscillator(),env=ctx.createGain();
-    osc.connect(env);env.connect(ctx.destination);
-    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime+delay);
-    env.gain.setValueAtTime(0,ctx.currentTime+delay);
-    env.gain.linearRampToValueAtTime(gain,ctx.currentTime+delay+0.01);
-    env.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+duration);
-    osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+duration+0.05);
-  }catch(e){}
+    const ctx=getAudio();
+    if(ctx.state==='suspended'){ctx.resume().then(()=>_playTone(ctx,freq,type,duration,gain,delay));}
+    else{_playTone(ctx,freq,type,duration,gain,delay);}
+  }catch(e){console.log('Sound error:',e);}
+}
+function _playTone(ctx,freq,type,duration,gain,delay){
+  const osc=ctx.createOscillator(),env=ctx.createGain();
+  osc.connect(env);env.connect(ctx.destination);
+  osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime+(delay||0));
+  env.gain.setValueAtTime(0,ctx.currentTime+(delay||0));
+  env.gain.linearRampToValueAtTime(gain,ctx.currentTime+(delay||0)+0.01);
+  env.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(delay||0)+duration);
+  osc.start(ctx.currentTime+(delay||0));
+  osc.stop(ctx.currentTime+(delay||0)+duration+0.05);
 }
 function playChime(){
   playTone(523,'sine',0.8,0.4,0.0);playTone(659,'sine',0.8,0.4,0.3);
@@ -339,6 +352,7 @@ function playWarningBeep(){playTone(440,'sine',0.15,0.3,0.0);playTone(440,'sine'
 function playOvertimeBeep(){playTone(330,'triangle',0.2,0.25,0.0);}
 function stopOvertimeBeeps(){if(overtimeBeepInterval){clearInterval(overtimeBeepInterval);overtimeBeepInterval=null;}}
 function resetSoundFlags(){warned5min=false;playedEnd=false;stopOvertimeBeeps();}
+function testSound(){playChime();}
 
 const fmt=s=>{const m=String(Math.floor(Math.abs(s)/60)).padStart(2,"0"),sec=String(Math.abs(s)%60).padStart(2,"0");return(s<0?"-":"")+m+":"+sec;};
 const $=id=>document.getElementById(id);
