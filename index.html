@@ -124,6 +124,20 @@
   .legend-item .li-desc{color:#CCFBF1;font-size:10px;margin-top:2px;}
   .footer{text-align:center;margin-top:12px;color:rgba(255,255,255,0.55);font-size:11px;}
 
+  /* Permanent history section */
+  .history-section{width:100%;max-width:500px;margin-top:16px;}
+  .history-section h2{font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .clear-hist-btn{font-size:11px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;}
+  .clear-hist-btn:hover{color:#fff;background:rgba(220,38,38,0.4);border-color:rgba(220,38,38,0.6);}
+  .history-list{display:flex;flex-direction:column;gap:6px;}
+  .history-item{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+  .history-item .h-left{}
+  .history-item .h-day{color:#fff;font-size:13px;font-weight:600;}
+  .history-item .h-date{color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px;}
+  .history-item .h-note{color:#CCFBF1;font-size:11px;font-style:italic;margin-top:3px;}
+  .history-item .h-dur{font-size:16px;font-weight:700;color:#CCFBF1;}
+  .hist-empty{color:rgba(255,255,255,0.35);font-size:13px;text-align:center;padding:12px 0;}
+
   #installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;padding:14px 20px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:999;}
   #installBanner button{margin-left:12px;padding:6px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
   #installBanner .dismiss{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.4);}
@@ -231,6 +245,16 @@
       <div class="legend-item"><div class="li-label">DOCUMENT</div><div class="li-desc">reflect</div></div>
     </div>
     <div class="footer">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
+
+    <div class="history-section">
+      <h2>
+        Full Session History
+        <button class="clear-hist-btn" onclick="clearAllHistory()">Clear all</button>
+      </h2>
+      <div class="history-list" id="fullHistoryList">
+        <div class="hist-empty">No sessions yet — start your first timer!</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -291,6 +315,30 @@ let TOTAL=customDuration*60;
 let elapsed=0,phaseElapsed=0,phase=0,running=false,timer=null;
 let startTimestamp=null,startElapsed=0,startPhaseElapsed=0;
 let sessions=JSON.parse(localStorage.getItem("andySessions")||"[]");
+let warned5min=false,playedEnd=false,overtimeBeepInterval=null;
+
+// ── Sound Engine ──────────────────────────────────────────────────
+let audioCtx=null;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,type,duration,gain,delay){
+  try{
+    const ctx=getAudio(),osc=ctx.createOscillator(),env=ctx.createGain();
+    osc.connect(env);env.connect(ctx.destination);
+    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+    env.gain.setValueAtTime(0,ctx.currentTime+delay);
+    env.gain.linearRampToValueAtTime(gain,ctx.currentTime+delay+0.01);
+    env.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+duration);
+    osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+duration+0.05);
+  }catch(e){}
+}
+function playChime(){
+  playTone(523,'sine',0.8,0.4,0.0);playTone(659,'sine',0.8,0.4,0.3);
+  playTone(784,'sine',1.2,0.5,0.6);playTone(1047,'sine',1.5,0.4,1.0);
+}
+function playWarningBeep(){playTone(440,'sine',0.15,0.3,0.0);playTone(440,'sine',0.15,0.3,0.35);}
+function playOvertimeBeep(){playTone(330,'triangle',0.2,0.25,0.0);}
+function stopOvertimeBeeps(){if(overtimeBeepInterval){clearInterval(overtimeBeepInterval);overtimeBeepInterval=null;}}
+function resetSoundFlags(){warned5min=false;playedEnd=false;stopOvertimeBeeps();}
 
 const fmt=s=>{const m=String(Math.floor(Math.abs(s)/60)).padStart(2,"0"),sec=String(Math.abs(s)%60).padStart(2,"0");return(s<0?"-":"")+m+":"+sec;};
 const $=id=>document.getElementById(id);
@@ -400,7 +448,17 @@ function tick(){
   const delta=Math.floor((now-startTimestamp)/1000);
   elapsed=startElapsed+delta;
   phaseElapsed=startPhaseElapsed+delta;
-  if(elapsed>=HARDCAP){elapsed=HARDCAP;running=false;finishSession();updateUI();return;}
+  // 5-minute warning
+  if(!warned5min && elapsed>=TOTAL-300 && elapsed<TOTAL){
+    warned5min=true; playWarningBeep();
+  }
+  // Session end chime
+  if(!playedEnd && elapsed>=TOTAL){
+    playedEnd=true; playChime();
+    // Start overtime beep every 60s
+    overtimeBeepInterval=setInterval(()=>{if(running&&elapsed>TOTAL)playOvertimeBeep();},60000);
+  }
+  if(elapsed>=HARDCAP){elapsed=HARDCAP;running=false;stopOvertimeBeeps();finishSession();updateUI();return;}
   updateUI();
   timer=setTimeout(tick,250);
 }
@@ -408,6 +466,7 @@ function tick(){
 function startSession(){
   clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=1;running=true;
   startTimestamp=Date.now();startElapsed=0;startPhaseElapsed=0;
+  resetSoundFlags();
   $("noteArea").style.display="block";$("doneBox").style.display="none";
   updateUI();tick();
 }
@@ -425,11 +484,12 @@ function finishSession(){
   try{localStorage.setItem("andySessions",JSON.stringify(sessions));}catch(e){}
   const db=$("doneBox");db.style.display="block";
   db.innerHTML="<strong>Day "+s.day+" complete!</strong> Total: "+mins+" min "+(mins<=customDuration?"✓ on target":"— over target")+(note?'<br><em style="font-size:11px;display:block;margin-top:4px;">"'+note+'"</em>':"");
-  renderLogSection();renderStats();updateUI();
+  renderLogSection();renderStats();renderFullHistory();updateUI();
 }
 
 function reset(){
   clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=0;running=false;
+  resetSoundFlags();
   $("noteInput").value="";$("noteArea").style.display="none";
   $("doneBox").style.display="none";$("warnBox").style.display="none";
   updateUI();
@@ -486,8 +546,28 @@ $("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.promp
 $("dismissBtn").onclick=()=>{$("installBanner").style.display="none";};
 window.addEventListener("appinstalled",()=>{$("installBanner").style.display="none";});
 
+function renderFullHistory(){
+  const el=document.getElementById("fullHistoryList");
+  if(!sessions.length){el.innerHTML='<div class="hist-empty">No sessions yet — start your first timer!</div>';return;}
+  el.innerHTML=sessions.slice().reverse().map(s=>`
+    <div class="history-item">
+      <div class="h-left">
+        <div class="h-day">Day ${s.day} &nbsp;·&nbsp; ${s.date}${s.duration&&s.duration!==60?' &nbsp;·&nbsp; '+s.duration+'min':''}</div>
+        ${s.note?`<div class="h-note">"${s.note.slice(0,70)}${s.note.length>70?'…':''}"</div>`:''}
+      </div>
+      <div class="h-dur" style="color:${s.mins<=(s.duration||60)?'#CCFBF1':'#FCA5A5'}">${s.mins}m</div>
+    </div>`).join('');
+}
+
+function clearAllHistory(){
+  if(!confirm('Clear all session history? This cannot be undone.'))return;
+  sessions=[];
+  try{localStorage.removeItem("andySessions");}catch(e){}
+  renderFullHistory();renderStats();renderLogSection();
+}
+
 // Init
-updateProgLabels();renderLogSection();renderStats();updateGoal();updateUI();
+updateProgLabels();renderLogSection();renderStats();renderFullHistory();updateGoal();updateUI();
 </script>
 </body>
 </html>
