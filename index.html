@@ -11,136 +11,150 @@
 <title>90-Day Study Timer — Andy</title>
 <link rel="manifest" id="manifestLink"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy:#1B3A6B;--blue:#2563EB;--sky:#DBEAFE;--teal:#0D9488;--teallt:#CCFBF1;
-    --orange:#EA580C;--orangelt:#FFF7ED;--gray:#374151;--graylt:#F3F4F6;--graymd:#E5E7EB;
-    --white:#ffffff;--green:#16A34A;--greenlt:#DCFCE7;--red:#DC2626;--redlt:#FEE2E2;
-    --text:#111827;--textmd:#6B7280;--surface:#F9FAFB;--card:#ffffff;--border:#E5E7EB;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1B3A6B;--blue:#2563EB;--sky:#DBEAFE;--teal:#0D9488;--teallt:#CCFBF1;
+  --orange:#EA580C;--orangelt:#FFF7ED;--graymd:#E5E7EB;
+  --white:#ffffff;--green:#16A34A;--greenlt:#DCFCE7;--red:#DC2626;--redlt:#FEE2E2;
+  --text:#111827;--textmd:#6B7280;--surface:#F9FAFB;--card:#ffffff;--border:#E5E7EB;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --navy:#93B4E8;--blue:#60A5FA;--sky:#1E3A5F;--teal:#2DD4BF;--teallt:#0F3530;
+    --orange:#FB923C;--orangelt:#3A1F0A;--graymd:#374151;
+    --white:#111827;--green:#4ADE80;--greenlt:#052E16;--red:#F87171;--redlt:#450A0A;
+    --text:#F9FAFB;--textmd:#9CA3AF;--surface:#111827;--card:#1F2937;--border:#374151;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --navy:#93B4E8;--blue:#60A5FA;--sky:#1E3A5F;--teal:#2DD4BF;--teallt:#0F3530;
-      --orange:#FB923C;--orangelt:#3A1F0A;--gray:#D1D5DB;--graylt:#1F2937;--graymd:#374151;
-      --white:#111827;--green:#4ADE80;--greenlt:#052E16;--red:#F87171;--redlt:#450A0A;
-      --text:#F9FAFB;--textmd:#9CA3AF;--surface:#111827;--card:#1F2937;--border:#374151;
-    }
-  }
-  html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);}
-  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .container{width:100%;max-width:500px;}
-  .header{text-align:center;margin-bottom:18px;}
-  .header h1{color:#fff;font-size:20px;font-weight:600;letter-spacing:0.5px;}
-  .header p{color:#CCFBF1;font-size:13px;margin-top:4px;}
-  .card{background:var(--card);border-radius:20px;padding:24px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.28);}
+}
+html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 100%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);}
+.wrap{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px;}
+.container{width:100%;max-width:500px;padding-bottom:40px;}
+.header{text-align:center;margin-bottom:18px;}
+.header h1{color:#fff;font-size:20px;font-weight:600;letter-spacing:0.5px;}
+.header p{color:#CCFBF1;font-size:13px;margin-top:4px;}
+.card{background:var(--card);border-radius:20px;padding:24px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.28);}
 
-  /* Duration picker */
-  .duration-section{margin-bottom:16px;}
-  .duration-label{font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:8px;}
-  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-  .preset-btn{background:var(--surface);color:var(--textmd);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit;}
-  .preset-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
-  .preset-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
-  .custom-row{display:flex;align-items:center;gap:8px;}
-  .custom-row label{font-size:11px;color:var(--textmd);white-space:nowrap;}
-  .custom-row input{width:65px;padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;text-align:center;outline:none;font-family:inherit;}
-  .custom-row input:focus{border-color:var(--navy);}
-  .set-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;}
-  .set-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
+/* Streak alert */
+.streak-alert{background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;color:#92400E;margin-bottom:14px;display:none;text-align:center;}
 
-  /* Day row */
-  .day-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;}
-  .day-box label{display:block;font-size:11px;font-weight:600;color:var(--textmd);margin-bottom:4px;letter-spacing:0.5px;}
-  .day-box input{width:68px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:20px;font-weight:600;text-align:center;outline:none;}
-  .day-box input:focus{border-color:var(--navy);}
-  .goal-box{flex:1;background:var(--surface);border-radius:10px;padding:9px 12px;min-height:54px;}
-  .goal-box .glabel{font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:3px;}
-  .goal-box .gtext{font-size:12px;color:var(--text);line-height:1.45;}
+/* Duration */
+.section-label{font-size:11px;font-weight:700;color:var(--textmd);letter-spacing:0.6px;margin-bottom:8px;}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.preset-btn{background:var(--surface);color:var(--textmd);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+.preset-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
+.preset-btn.active{background:#1B3A6B;color:#fff;border-color:#1B3A6B;}
+.custom-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.custom-row label{font-size:11px;color:var(--textmd);white-space:nowrap;}
+.custom-row input{width:65px;padding:5px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;text-align:center;outline:none;font-family:inherit;}
+.custom-row input:focus{border-color:#1B3A6B;}
+.set-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+.set-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
+.test-sound-btn{width:100%;margin-top:6px;padding:7px;text-align:center;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--textmd);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+.test-sound-btn:hover{background:var(--sky);border-color:var(--blue);color:var(--blue);}
 
-  /* Pills */
-  .pills{display:flex;gap:8px;margin-bottom:20px;}
-  .pill{flex:1;text-align:center;border-radius:10px;padding:9px 4px;border:1.5px solid transparent;transition:all 0.3s;}
-  .pill.idle{background:var(--surface);border-color:var(--border);}
-  .pill.active{border-color:var(--pill-c);background:var(--pill-c);}
-  .pill.done{background:var(--pill-lt);border-color:var(--pill-c);}
-  .pill .plabel{font-size:10px;font-weight:700;letter-spacing:0.5px;}
-  .pill .pmins{font-size:19px;font-weight:600;margin:2px 0;}
+/* Day row */
+.day-row{display:flex;gap:12px;align-items:flex-start;margin:16px 0;}
+.day-box label{display:block;font-size:11px;font-weight:600;color:var(--textmd);margin-bottom:4px;letter-spacing:0.5px;}
+.day-box input{width:68px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:20px;font-weight:600;text-align:center;outline:none;}
+.day-box input:focus{border-color:#1B3A6B;}
+.goal-box{flex:1;background:var(--surface);border-radius:10px;padding:9px 12px;min-height:54px;}
+.goal-box .glabel{font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:3px;}
+.goal-box .gtext{font-size:12px;color:var(--text);line-height:1.45;}
+.goal-check{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.goal-check input[type=checkbox]{width:15px;height:15px;accent-color:#0D9488;cursor:pointer;}
+.goal-check label{font-size:11px;color:var(--teal);font-weight:600;cursor:pointer;}
 
-  /* Clock */
-  .clock-wrap{display:flex;justify-content:center;margin-bottom:14px;position:relative;}
-  .clock-svg{display:block;}
-  .clock-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
-  .clock-time{font-size:40px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
-  .clock-sub{font-size:11px;color:var(--textmd);margin-top:3px;}
-  .clock-over{font-size:11px;font-weight:700;color:var(--red);margin-top:2px;min-height:14px;}
+/* Phase pills — clickable */
+.pills-label{font-size:11px;font-weight:700;color:var(--textmd);letter-spacing:0.6px;margin-bottom:6px;}
+.pills{display:flex;gap:8px;margin-bottom:20px;}
+.pill{flex:1;text-align:center;border-radius:10px;padding:9px 4px;border:1.5px solid transparent;transition:all 0.3s;cursor:pointer;user-select:none;}
+.pill:hover:not(.active){filter:brightness(0.95);}
+.pill.idle{background:var(--surface);border-color:var(--border);}
+.pill.active{border-color:var(--pill-c);background:var(--pill-c);}
+.pill.done{background:var(--pill-lt);border-color:var(--pill-c);}
+.pill.clickable-idle{background:var(--surface);border-color:var(--border);box-shadow:0 0 0 2px rgba(13,148,136,0.15);}
+.pill .plabel{font-size:10px;font-weight:700;letter-spacing:0.5px;}
+.pill .pmins{font-size:19px;font-weight:600;margin:2px 0;}
+.pill .phint{font-size:9px;margin-top:1px;opacity:0.7;}
 
-  /* Progress bar */
-  .prog-wrap{margin-bottom:6px;}
-  .prog-track{height:5px;background:var(--graymd);border-radius:4px;overflow:hidden;}
-  .prog-fill{height:100%;border-radius:4px;background:var(--navy);width:0%;transition:width 0.8s ease;}
-  .prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--textmd);margin-top:4px;}
+/* Clock */
+.clock-wrap{display:flex;justify-content:center;margin-bottom:14px;position:relative;}
+.clock-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.clock-time{font-size:40px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+.clock-sub{font-size:11px;color:var(--textmd);margin-top:3px;}
+.clock-over{font-size:11px;font-weight:700;color:var(--red);margin-top:2px;min-height:14px;}
 
-  /* Warn/done */
-  .warn-box{background:var(--redlt);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;display:none;}
-  .done-box{background:var(--greenlt);color:var(--green);border:1px solid var(--green);border-radius:10px;padding:12px 16px;font-size:13px;margin:8px 0;display:none;}
+/* Motivation */
+.motivation{background:var(--surface);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:8px 12px;font-size:12px;color:var(--text);font-style:italic;margin-bottom:12px;display:none;line-height:1.5;}
 
-  /* Controls */
-  .controls{display:flex;gap:8px;margin:12px 0;}
-  .btn{padding:13px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s,transform 0.1s;font-family:inherit;}
-  .btn:hover{background:var(--surface);}
-  .btn:active{transform:scale(0.97);}
-  .btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
-  .btn.primary:hover{filter:brightness(1.1);}
-  .btn.accent{background:var(--teal);color:#fff;border-color:var(--teal);}
-  .btn.accent:hover{filter:brightness(1.1);}
+/* Progress */
+.prog-wrap{margin-bottom:6px;}
+.prog-track{height:5px;background:var(--graymd);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;background:#1B3A6B;width:0%;transition:width 0.8s ease;}
+.prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--textmd);margin-top:4px;}
 
-  /* Note */
-  .note-area{display:none;margin-bottom:12px;}
-  .note-area label{display:block;font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:5px;}
-  .note-area textarea{width:100%;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:10px 12px;font-size:13px;resize:none;font-family:inherit;outline:none;}
-  .note-area textarea:focus{border-color:var(--teal);}
+/* Warn/done */
+.warn-box{background:var(--redlt);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;display:none;}
+.done-box{background:var(--greenlt);color:var(--green);border:1px solid var(--green);border-radius:10px;padding:12px 16px;font-size:13px;margin:8px 0;display:none;}
 
-  /* Today stats bar */
-  .stats-bar{display:flex;gap:8px;margin:12px 0 0 0;}
-  .stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;}
-  .stat-card .sv{font-size:20px;font-weight:700;color:var(--navy);}
-  .stat-card .sl{font-size:10px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-top:2px;}
+/* Controls */
+.controls{display:flex;gap:8px;margin:12px 0;}
+.btn{padding:13px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s,transform 0.1s;font-family:inherit;}
+.btn:hover{background:var(--surface);}
+.btn:active{transform:scale(0.97);}
+.btn.primary{background:#1B3A6B;color:#fff;border-color:#1B3A6B;}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn.accent{background:#0D9488;color:#fff;border-color:#0D9488;}
+.btn.accent:hover{filter:brightness(1.1);}
 
-  /* Log */
-  .log-section{margin-top:14px;display:none;}
-  .log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-  .log-title{font-size:11px;font-weight:700;color:var(--textmd);letter-spacing:0.5px;}
-  .log-list{display:none;border:1px solid var(--border);border-radius:10px;max-height:200px;overflow-y:auto;}
-  .log-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border);gap:8px;}
-  .log-row:last-child{border-bottom:none;}
-  .log-day{font-size:13px;font-weight:600;color:var(--text);}
-  .log-note{font-size:11px;color:var(--textmd);margin-top:2px;font-style:italic;}
-  .log-time{font-size:13px;font-weight:700;white-space:nowrap;}
+/* Note */
+.note-area{display:none;margin-bottom:12px;}
+.note-area label{display:block;font-size:11px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-bottom:5px;}
+.note-area textarea{width:100%;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:10px 12px;font-size:13px;resize:none;font-family:inherit;outline:none;}
+.note-area textarea:focus{border-color:#0D9488;}
 
-  /* Legend */
-  .legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
-  .legend-item{background:rgba(255,255,255,0.15);border-radius:10px;padding:9px 10px;text-align:center;}
-  .legend-item .li-label{color:#fff;font-size:11px;font-weight:700;}
-  .legend-item .li-desc{color:#CCFBF1;font-size:10px;margin-top:2px;}
-  .footer{text-align:center;margin-top:12px;color:rgba(255,255,255,0.55);font-size:11px;}
+/* Stats */
+.stats-bar{display:flex;gap:8px;margin:12px 0 0 0;}
+.stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;}
+.stat-card .sv{font-size:20px;font-weight:700;color:#1B3A6B;}
+.stat-card .sl{font-size:10px;font-weight:600;color:var(--textmd);letter-spacing:0.5px;margin-top:2px;}
 
-  /* Permanent history section */
-  .history-section{width:100%;max-width:500px;margin-top:16px;}
-  .history-section h2{font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-  .clear-hist-btn{font-size:11px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;}
-  .clear-hist-btn:hover{color:#fff;background:rgba(220,38,38,0.4);border-color:rgba(220,38,38,0.6);}
-  .history-list{display:flex;flex-direction:column;gap:6px;}
-  .history-item{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
-  .history-item .h-left{}
-  .history-item .h-day{color:#fff;font-size:13px;font-weight:600;}
-  .history-item .h-date{color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px;}
-  .history-item .h-note{color:#CCFBF1;font-size:11px;font-style:italic;margin-top:3px;}
-  .history-item .h-dur{font-size:16px;font-weight:700;color:#CCFBF1;}
-  .hist-empty{color:rgba(255,255,255,0.35);font-size:13px;text-align:center;padding:12px 0;}
+/* Session log */
+.log-section{margin-top:14px;display:none;}
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.log-title{font-size:11px;font-weight:700;color:var(--textmd);letter-spacing:0.5px;}
+.log-list{display:none;border:1px solid var(--border);border-radius:10px;max-height:200px;overflow-y:auto;}
+.log-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid var(--border);gap:8px;}
+.log-row:last-child{border-bottom:none;}
+.log-day{font-size:13px;font-weight:600;color:var(--text);}
+.log-note{font-size:11px;color:var(--textmd);margin-top:2px;font-style:italic;}
+.log-time{font-size:13px;font-weight:700;white-space:nowrap;}
 
-  #installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;padding:14px 20px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:999;}
-  #installBanner button{margin-left:12px;padding:6px 16px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
-  #installBanner .dismiss{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.4);}
+/* Legend */
+.legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
+.legend-item{background:rgba(255,255,255,0.15);border-radius:10px;padding:9px 10px;text-align:center;}
+.legend-item .li-label{color:#fff;font-size:11px;font-weight:700;}
+.legend-item .li-desc{color:#CCFBF1;font-size:10px;margin-top:2px;}
+.footer{text-align:center;margin-top:12px;color:rgba(255,255,255,0.55);font-size:11px;}
+
+/* Full history */
+.history-section{width:100%;max-width:500px;margin-top:16px;}
+.history-section h2{font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.clear-hist-btn{font-size:11px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:3px 10px;cursor:pointer;}
+.clear-hist-btn:hover{color:#fff;background:rgba(220,38,38,0.4);border-color:rgba(220,38,38,0.6);}
+.history-list{display:flex;flex-direction:column;gap:6px;}
+.history-item{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.history-item .h-day{color:#fff;font-size:13px;font-weight:600;}
+.history-item .h-meta{color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px;}
+.history-item .h-note{color:#CCFBF1;font-size:11px;font-style:italic;margin-top:3px;}
+.history-item .h-right{text-align:right;}
+.history-item .h-dur{font-size:16px;font-weight:700;}
+.history-item .h-goal{font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;}
+.hist-empty{color:rgba(255,255,255,0.35);font-size:13px;text-align:center;padding:12px 0;}
+
+#installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:#1B3A6B;color:#fff;padding:14px 20px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:999;}
+#installBanner button{margin-left:12px;padding:6px 16px;background:#0D9488;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
+#installBanner .dismiss{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.4);}
 </style>
 </head>
 <body>
@@ -151,27 +165,25 @@
       <p>Andy's Enterprise Tech Mastery &nbsp;·&nbsp; Flexible focus sessions</p>
     </div>
 
+    <div class="streak-alert" id="streakAlert">⚠️ Your streak is at risk — you haven't studied today yet. Start your session!</div>
+
     <div class="card">
 
-      <!-- Duration Picker -->
-      <div class="duration-section">
-        <div class="duration-label">SESSION DURATION</div>
-        <div class="presets" id="presetBtns">
-          <button class="preset-btn" onclick="setPreset(25)">25 min</button>
-          <button class="preset-btn" onclick="setPreset(45)">45 min</button>
-          <button class="preset-btn active" onclick="setPreset(60)">60 min</button>
-          <button class="preset-btn" onclick="setPreset(90)">90 min</button>
-          <button class="preset-btn" onclick="setPreset(120)">120 min</button>
-        </div>
-        <div class="custom-row">
-          <label>Custom:</label>
-          <input type="number" id="customMin" min="1" max="480" placeholder="mins"/>
-          <button class="set-btn" onclick="applyCustom()">Set</button>
-        </div>
-        <div style="margin-top:8px;">
-          <button class="set-btn" onclick="testSound()" style="width:100%;text-align:center;padding:7px;">🔔 Test Sound</button>
-        </div>
+      <!-- Duration -->
+      <div class="section-label">SESSION DURATION</div>
+      <div class="presets" id="presetBtns">
+        <button class="preset-btn" onclick="setDuration(25)">25 min</button>
+        <button class="preset-btn" onclick="setDuration(45)">45 min</button>
+        <button class="preset-btn active" onclick="setDuration(60)">60 min</button>
+        <button class="preset-btn" onclick="setDuration(90)">90 min</button>
+        <button class="preset-btn" onclick="setDuration(120)">120 min</button>
       </div>
+      <div class="custom-row">
+        <label>Custom:</label>
+        <input type="number" id="customMin" min="1" max="480" placeholder="mins"/>
+        <button class="set-btn" onclick="applyCustom()">Set</button>
+      </div>
+      <button class="test-sound-btn" onclick="testSound()">🔔 Test Sound</button>
 
       <!-- Day + Goal -->
       <div class="day-row">
@@ -182,25 +194,30 @@
         <div class="goal-box">
           <div class="glabel">TODAY'S GOAL</div>
           <div class="gtext" id="dayGoal">Set your day and press Start</div>
+          <div class="goal-check">
+            <input type="checkbox" id="goalCheck" onchange="saveGoalCheck()"/>
+            <label for="goalCheck">Mark goal complete</label>
+          </div>
         </div>
       </div>
 
-      <!-- Pills -->
+      <!-- Phase pills -->
+      <div class="pills-label">PHASES — click to set duration</div>
       <div class="pills" id="phasePills"></div>
 
       <!-- Clock -->
       <div class="clock-wrap">
-        <svg class="clock-svg" width="220" height="220" viewBox="0 0 220 220">
+        <svg width="220" height="220" viewBox="0 0 220 220">
           <circle cx="110" cy="110" r="100" fill="none" stroke="#E5E7EB" stroke-width="12"/>
           <circle cx="110" cy="110" r="100" fill="none" id="outerRing"
             stroke="#1B3A6B" stroke-width="12" stroke-linecap="round"
             stroke-dasharray="628.3" stroke-dashoffset="628.3"
-            transform="rotate(-90 110 110)" style="transition:stroke-dashoffset 0.8s,stroke 0.3s;"/>
+            transform="rotate(-90 110 110)" style="transition:stroke-dashoffset 0.5s,stroke 0.3s;"/>
           <circle cx="110" cy="110" r="76" fill="none" stroke="#E5E7EB" stroke-width="10"/>
           <circle cx="110" cy="110" r="76" fill="none" id="innerRing"
             stroke="#0D9488" stroke-width="10" stroke-linecap="round"
             stroke-dasharray="477.5" stroke-dashoffset="477.5"
-            transform="rotate(-90 110 110)" style="transition:stroke-dashoffset 0.6s,stroke 0.3s;"/>
+            transform="rotate(-90 110 110)" style="transition:stroke-dashoffset 0.4s,stroke 0.3s;"/>
         </svg>
         <div class="clock-center">
           <div class="clock-time" id="clockFace">00:00</div>
@@ -209,10 +226,13 @@
         </div>
       </div>
 
-      <!-- Progress bar -->
+      <!-- Motivation -->
+      <div class="motivation" id="motivationBox"></div>
+
+      <!-- Progress -->
       <div class="prog-wrap">
         <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-        <div class="prog-labels" id="progLabels"><span>0</span><span>15m</span><span>30m</span><span>45m</span><span>60m</span></div>
+        <div class="prog-labels" id="progLabels"></div>
       </div>
 
       <div class="warn-box" id="warnBox"></div>
@@ -225,7 +245,7 @@
         <textarea id="noteInput" rows="2" placeholder="What did I build? Why does this feature matter for my career?"></textarea>
       </div>
 
-      <!-- Today Stats -->
+      <!-- Stats -->
       <div class="stats-bar">
         <div class="stat-card"><div class="sv" id="statSessions">0</div><div class="sl">TODAY'S SESSIONS</div></div>
         <div class="stat-card"><div class="sv" id="statMins">0</div><div class="sl">TOTAL MINS</div></div>
@@ -243,12 +263,13 @@
     </div>
 
     <div class="legend">
-      <div class="legend-item"><div class="li-label">INPUT</div><div class="li-desc">watch/read</div></div>
-      <div class="legend-item"><div class="li-label">BUILD</div><div class="li-desc">implement</div></div>
-      <div class="legend-item"><div class="li-label">DOCUMENT</div><div class="li-desc">reflect</div></div>
+      <div class="legend-item"><div class="li-label">INPUT</div><div class="li-desc">15 min · watch/read</div></div>
+      <div class="legend-item"><div class="li-label">BUILD</div><div class="li-desc">30 min · implement</div></div>
+      <div class="legend-item"><div class="li-label">DOCUMENT</div><div class="li-desc">15 min · reflect</div></div>
     </div>
     <div class="footer">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
 
+    <!-- Full History -->
     <div class="history-section">
       <h2>
         Full Session History
@@ -268,10 +289,14 @@
 </div>
 
 <script>
+// ── Constants ────────────────────────────────────────────────────
 const PHASES=[
-  {id:"input",   label:"Input",   mins:15,color:"#2563EB",light:"#DBEAFE"},
-  {id:"build",   label:"Build",   mins:30,color:"#0D9488",light:"#CCFBF1"},
-  {id:"document",label:"Document",mins:15,color:"#EA580C",light:"#FFF7ED"},
+  {id:"input",   label:"Input",   mins:15,color:"#2563EB",light:"#DBEAFE",
+   motivation:"Stay focused — absorb the concept fully before moving on."},
+  {id:"build",   label:"Build",   mins:30,color:"#0D9488",light:"#CCFBF1",
+   motivation:"Build it, don't just read it. Hands on keyboard beats eyes on screen."},
+  {id:"document",label:"Document",mins:15,color:"#EA580C",light:"#FFF7ED",
+   motivation:"Document now while it's fresh — this is your portfolio evidence."},
 ];
 const HARDCAP=5400;
 const GOALS={
@@ -313,207 +338,319 @@ const GOALS={
   90:"Final: upload all certification badges to LinkedIn — you're done!",
 };
 
-let customDuration=60; // default 60 min
+// ── State ────────────────────────────────────────────────────────
+let customDuration=60;
 let TOTAL=customDuration*60;
-let elapsed=0,phaseElapsed=0,phase=0,running=false,timer=null;
-let startTimestamp=null,startElapsed=0,startPhaseElapsed=0;
-let sessions=JSON.parse(localStorage.getItem("andySessions")||"[]");
+let elapsed=0,phaseElapsed=0,phase=0,running=false,timerRAF=null;
+let startWallTime=null,startElapsed=0,startPhaseElapsed=0;
 let warned5min=false,playedEnd=false,overtimeBeepInterval=null;
+let autoAdvancing=false;
+let sessions=JSON.parse(localStorage.getItem("andySessions")||"[]");
+let goalChecks=JSON.parse(localStorage.getItem("andyGoalChecks")||"{}");
 
-// ── Sound Engine ──────────────────────────────────────────────────
+const fmt=s=>{
+  const abs=Math.abs(s);
+  const m=String(Math.floor(abs/60)).padStart(2,"0");
+  const sec=String(abs%60).padStart(2,"0");
+  return(s<0?"-":"")+m+":"+sec;
+};
+const $=id=>document.getElementById(id);
+
+// ── Audio ─────────────────────────────────────────────────────────
 let audioCtx=null;
 function getAudio(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
-function playTone(freq,type,duration,gain,delay){
-  try{
-    const ctx=getAudio();
-    if(ctx.state==='suspended'){ctx.resume().then(()=>_playTone(ctx,freq,type,duration,gain,delay));}
-    else{_playTone(ctx,freq,type,duration,gain,delay);}
-  }catch(e){console.log('Sound error:',e);}
-}
-function _playTone(ctx,freq,type,duration,gain,delay){
+function _tone(ctx,freq,type,start,dur,gain){
   const osc=ctx.createOscillator(),env=ctx.createGain();
   osc.connect(env);env.connect(ctx.destination);
-  osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime+(delay||0));
-  env.gain.setValueAtTime(0,ctx.currentTime+(delay||0));
-  env.gain.linearRampToValueAtTime(gain,ctx.currentTime+(delay||0)+0.01);
-  env.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(delay||0)+duration);
-  osc.start(ctx.currentTime+(delay||0));
-  osc.stop(ctx.currentTime+(delay||0)+duration+0.05);
+  osc.type=type;osc.frequency.setValueAtTime(freq,start);
+  env.gain.setValueAtTime(0,start);
+  env.gain.linearRampToValueAtTime(gain,start+0.015);
+  env.gain.exponentialRampToValueAtTime(0.001,start+dur);
+  osc.start(start);osc.stop(start+dur+0.05);
+}
+function playTones(notes){
+  try{
+    const ctx=getAudio();
+    const base=ctx.currentTime+0.05;
+    notes.forEach(([freq,type,delay,dur,gain])=>_tone(ctx,freq,type,base+delay,dur,gain));
+  }catch(e){console.warn("Audio error",e);}
 }
 function playChime(){
-  playTone(523,'sine',0.8,0.4,0.0);playTone(659,'sine',0.8,0.4,0.3);
-  playTone(784,'sine',1.2,0.5,0.6);playTone(1047,'sine',1.5,0.4,1.0);
+  playTones([[523,'sine',0,0.7,0.4],[659,'sine',0.25,0.7,0.4],[784,'sine',0.5,1.0,0.5],[1047,'sine',0.85,1.4,0.45]]);
 }
-function playWarningBeep(){playTone(440,'sine',0.15,0.3,0.0);playTone(440,'sine',0.15,0.3,0.35);}
-function playOvertimeBeep(){playTone(330,'triangle',0.2,0.25,0.0);}
+function playWarningBeep(){
+  playTones([[440,'sine',0,0.18,0.3],[440,'sine',0.28,0.18,0.3]]);
+}
+function playTransitionSound(){
+  playTones([[600,'sine',0,0.12,0.25],[750,'sine',0.15,0.12,0.25],[900,'sine',0.3,0.2,0.3]]);
+}
+function playOvertimeBeep(){
+  playTones([[300,'triangle',0,0.25,0.2]]);
+}
+function testSound(){playChime();}
 function stopOvertimeBeeps(){if(overtimeBeepInterval){clearInterval(overtimeBeepInterval);overtimeBeepInterval=null;}}
 function resetSoundFlags(){warned5min=false;playedEnd=false;stopOvertimeBeeps();}
-function testSound(){playChime();}
 
-const fmt=s=>{const m=String(Math.floor(Math.abs(s)/60)).padStart(2,"0"),sec=String(Math.abs(s)%60).padStart(2,"0");return(s<0?"-":"")+m+":"+sec;};
-const $=id=>document.getElementById(id);
-
-function setPreset(mins){
+// ── Duration control ──────────────────────────────────────────────
+function setDuration(mins,skipReset){
   if(running)return;
   customDuration=mins;
   TOTAL=mins*60;
-  document.querySelectorAll(".preset-btn").forEach(b=>b.classList.toggle("active",b.textContent.trim()===mins+" min"));
+  document.querySelectorAll(".preset-btn").forEach(b=>{
+    b.classList.toggle("active",b.textContent.trim()===mins+" min");
+  });
   $("customMin").value="";
   updateProgLabels();
-  resetUI();
+  if(!skipReset) resetState();
 }
-
 function applyCustom(){
   if(running)return;
   const val=parseInt($("customMin").value);
-  if(!val||val<1||val>480){alert("Please enter a duration between 1 and 480 minutes.");return;}
+  if(!val||val<1||val>480){alert("Enter 1–480 minutes.");return;}
   customDuration=val;
   TOTAL=val*60;
   document.querySelectorAll(".preset-btn").forEach(b=>b.classList.remove("active"));
   updateProgLabels();
-  resetUI();
+  resetState();
 }
-
 function updateProgLabels(){
-  const half=Math.round(customDuration/2);
-  const q1=Math.round(customDuration/4);
-  const q3=Math.round(customDuration*3/4);
-  $("progLabels").innerHTML=`<span>0</span><span>${q1}m</span><span>${half}m</span><span>${q3}m</span><span>${customDuration}m</span>`;
+  const d=customDuration;
+  const q1=Math.round(d/4),h=Math.round(d/2),q3=Math.round(d*3/4);
+  $("progLabels").innerHTML=`<span>0</span><span>${q1}m</span><span>${h}m</span><span>${q3}m</span><span>${d}m</span>`;
 }
 
-function resetUI(){
-  elapsed=0;phaseElapsed=0;
-  $("clockFace").textContent=fmt(0);
-  $("clockSub").textContent="READY";
-  $("clockOver").textContent="";
-  $("outerRing").style.strokeDashoffset=628.3;
-  $("innerRing").style.strokeDashoffset=477.5;
-  $("progFill").style.width="0%";
-  $("warnBox").style.display="none";
-}
-
+// ── Day / Goal ────────────────────────────────────────────────────
 function getDay(){return Math.max(1,Math.min(90,parseInt($("dayInput").value)||1));}
-
 function updateGoal(){
   const d=getDay();
   $("dayGoal").textContent=GOALS[d]||"Day "+d+" — refer to your workbook for today's goal";
+  const key="day"+d;
+  $("goalCheck").checked=!!goalChecks[key];
+}
+function saveGoalCheck(){
+  const key="day"+getDay();
+  goalChecks[key]=$("goalCheck").checked;
+  try{localStorage.setItem("andyGoalChecks",JSON.stringify(goalChecks));}catch(e){}
 }
 
+// ── Pills ─────────────────────────────────────────────────────────
 function renderPills(){
   const el=$("phasePills");el.innerHTML="";
   PHASES.forEach((p,i)=>{
-    const n=i+1,isActive=phase===n,isDone=phase>n||phase===4;
+    const n=i+1,isActive=phase===n,isDone=(phase>n)||(phase===4);
     const div=document.createElement("div");
-    div.className="pill "+(isActive?"active":isDone?"done":"idle");
+    const stateClass=isActive?"active":isDone?"done":"clickable-idle";
+    div.className="pill "+stateClass;
     div.style.setProperty("--pill-c",p.color);
     div.style.setProperty("--pill-lt",p.light);
     const tc=isActive?"#fff":isDone?p.color:"var(--textmd)";
-    div.innerHTML=`<div class="plabel" style="color:${tc}">${isDone?"✓ ":""}${p.label.toUpperCase()}</div><div class="pmins" style="color:${tc}">${p.mins}m</div>`;
+    div.innerHTML=`<div class="plabel" style="color:${tc}">${isDone?"✓ ":""}${p.label.toUpperCase()}</div>`+
+      `<div class="pmins" style="color:${tc}">${p.mins}m</div>`+
+      `<div class="phint" style="color:${tc}">${phase===0?"tap to set":isActive?"active":isDone?"done":""}</div>`;
+    if(phase===0){
+      div.onclick=()=>{
+        setDuration(p.mins,true);
+        document.querySelectorAll(".preset-btn").forEach(b=>b.classList.remove("active"));
+      };
+    }
     el.appendChild(div);
   });
 }
 
-function renderControls(){
-  const c=$("controls");c.innerHTML="";
-  const mk=(txt,cls,fn,flex=false)=>{const b=document.createElement("button");b.className="btn "+cls;if(flex)b.style.flex="1";b.textContent=txt;b.onclick=fn;c.appendChild(b);};
-  if(phase===0){
-    mk("▶  Start day "+getDay()+" session","primary",startSession,true);
-  } else if(phase>=1&&phase<=3){
-    mk(running?"⏸  Pause":"▶  Resume","",()=>{
-      running=!running;
-      if(running){startTimestamp=Date.now();startElapsed=elapsed;startPhaseElapsed=phaseElapsed;tick();}
-      else{clearTimeout(timer);}
-      renderControls();
-    },true);
-    mk(phase<3?"Next: "+PHASES[phase].label+" →":"✓  Finish session","accent",nextPhase,true);
-    mk("↺","",reset);
-  } else if(phase===4){
-    mk("＋  Start next day","primary",()=>{$("dayInput").value=getDay()+1;reset();updateGoal();},true);
-    mk("↺ Reset","",reset);
-  }
-}
-
+// ── Clock UI ──────────────────────────────────────────────────────
 function updateUI(){
   const cp=(phase>=1&&phase<=3)?PHASES[phase-1]:null;
   const pSecs=cp?cp.mins*60:0;
+
   $("clockFace").textContent=fmt(elapsed);
   $("clockFace").style.color=elapsed>TOTAL?"var(--red)":"var(--text)";
-  $("clockSub").textContent=phase===0?"READY":phase===4?"DONE ✓":cp?cp.label.toUpperCase()+" · "+fmt(Math.max(0,pSecs-phaseElapsed))+" left":"";
+
+  if(phase===0) $("clockSub").textContent="READY";
+  else if(phase===4) $("clockSub").textContent="DONE ✓";
+  else if(cp){
+    const left=Math.max(0,pSecs-phaseElapsed);
+    $("clockSub").textContent=cp.label.toUpperCase()+" · "+fmt(left)+" left";
+  }
+
   $("clockOver").textContent=(elapsed>TOTAL&&phase!==4)?"+"+fmt(elapsed-TOTAL)+" over target":"";
+
+  // Outer ring — overall progress
   const op=Math.min(elapsed/TOTAL,1);
   $("outerRing").style.strokeDashoffset=628.3*(1-op);
   $("outerRing").style.stroke=elapsed>TOTAL?"#DC2626":"#1B3A6B";
-  if(cp){const ip=Math.min(phaseElapsed/pSecs,1);$("innerRing").style.strokeDashoffset=477.5*(1-ip);$("innerRing").style.stroke=cp.color;}
-  else{$("innerRing").style.strokeDashoffset=477.5;}
-  const pf=$("progFill");pf.style.width=Math.min(op*100,100)+"%";pf.style.background=elapsed>TOTAL?"#DC2626":"#1B3A6B";
+
+  // Inner ring — phase progress
+  if(cp){
+    const ip=Math.min(phaseElapsed/pSecs,1);
+    $("innerRing").style.strokeDashoffset=477.5*(1-ip);
+    $("innerRing").style.stroke=cp.color;
+  } else {
+    $("innerRing").style.strokeDashoffset=477.5;
+  }
+
+  $("progFill").style.width=Math.min(op*100,100)+"%";
+  $("progFill").style.background=elapsed>TOTAL?"#DC2626":"#1B3A6B";
+
+  // Warn box
   const wb=$("warnBox");
-  if(elapsed>TOTAL&&phase!==4){wb.style.display="block";wb.textContent=elapsed>=HARDCAP?"Session stopped at 90-minute hard cap.":"⚠  Over target. Maximum allowed: 90 minutes.";}
-  else wb.style.display="none";
-  renderPills();renderControls();
+  if(elapsed>TOTAL&&phase!==4){
+    wb.style.display="block";
+    wb.textContent=elapsed>=HARDCAP?"Session stopped at 90-minute hard cap.":"⚠  Over target. Max allowed: 90 minutes.";
+  } else wb.style.display="none";
+
+  // Motivation
+  const mb=$("motivationBox");
+  if(cp&&phase>=1&&phase<=3){mb.style.display="block";mb.textContent=cp.motivation;}
+  else mb.style.display="none";
+
+  renderPills();
+  renderControls();
 }
 
+// ── Timer loop (RAF + wall-clock) ─────────────────────────────────
 function tick(){
   if(!running)return;
   const now=Date.now();
-  const delta=Math.floor((now-startTimestamp)/1000);
+  const delta=Math.floor((now-startWallTime)/1000);
   elapsed=startElapsed+delta;
   phaseElapsed=startPhaseElapsed+delta;
+
   // 5-minute warning
-  if(!warned5min && elapsed>=TOTAL-300 && elapsed<TOTAL){
-    warned5min=true; playWarningBeep();
+  if(!warned5min&&elapsed>=TOTAL-300&&elapsed<TOTAL){
+    warned5min=true;
+    playWarningBeep();
   }
+
   // Session end chime
-  if(!playedEnd && elapsed>=TOTAL){
-    playedEnd=true; playChime();
-    // Start overtime beep every 60s
-    overtimeBeepInterval=setInterval(()=>{if(running&&elapsed>TOTAL)playOvertimeBeep();},60000);
+  if(!playedEnd&&elapsed>=TOTAL){
+    playedEnd=true;
+    playChime();
+    overtimeBeepInterval=setInterval(()=>{if(running&&elapsed>=TOTAL)playOvertimeBeep();},60000);
   }
-  if(elapsed>=HARDCAP){elapsed=HARDCAP;running=false;stopOvertimeBeeps();finishSession();updateUI();return;}
+
+  // Hard cap
+  if(elapsed>=HARDCAP){
+    elapsed=HARDCAP;running=false;
+    stopOvertimeBeeps();
+    finishSession();updateUI();return;
+  }
+
+  // Auto-advance phase when phase time is up
+  const cp=phase>=1&&phase<=3?PHASES[phase-1]:null;
+  if(cp&&phaseElapsed>=cp.mins*60&&phase<3){
+    playTransitionSound();
+    phase++;
+    startPhaseElapsed=elapsed;
+    phaseElapsed=0;
+    startWallTime=Date.now();
+    startElapsed=elapsed;
+  }
+
   updateUI();
-  timer=setTimeout(tick,250);
+  timerRAF=requestAnimationFrame(tick);
 }
 
+// ── Session control ───────────────────────────────────────────────
 function startSession(){
-  clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=1;running=true;
-  startTimestamp=Date.now();startElapsed=0;startPhaseElapsed=0;
+  cancelAnimationFrame(timerRAF);
+  elapsed=0;phaseElapsed=0;phase=1;running=true;
+  startWallTime=Date.now();startElapsed=0;startPhaseElapsed=0;
   resetSoundFlags();
-  $("noteArea").style.display="block";$("doneBox").style.display="none";
+  $("noteArea").style.display="block";
+  $("doneBox").style.display="none";
   updateUI();tick();
 }
 
-function nextPhase(){
-  if(phase<3){phase++;phaseElapsed=0;startPhaseElapsed=0;startTimestamp=Date.now();startElapsed=elapsed;updateUI();}
-  else{running=false;clearTimeout(timer);finishSession();}
+function togglePause(){
+  if(running){
+    running=false;
+    cancelAnimationFrame(timerRAF);
+  } else {
+    running=true;
+    startWallTime=Date.now();
+    startElapsed=elapsed;
+    startPhaseElapsed=phaseElapsed;
+    tick();
+  }
+  renderControls();
 }
 
-function finishSession(){
-  phase=4;running=false;clearTimeout(timer);
-  const mins=Math.round(elapsed/60),note=$("noteInput").value;
-  const s={day:getDay(),date:new Date().toLocaleDateString(),dateStr:new Date().toDateString(),mins,note,duration:customDuration};
-  sessions.push(s);
-  try{localStorage.setItem("andySessions",JSON.stringify(sessions));}catch(e){}
-  const db=$("doneBox");db.style.display="block";
-  db.innerHTML="<strong>Day "+s.day+" complete!</strong> Total: "+mins+" min "+(mins<=customDuration?"✓ on target":"— over target")+(note?'<br><em style="font-size:11px;display:block;margin-top:4px;">"'+note+'"</em>':"");
-  renderLogSection();renderStats();renderFullHistory();updateUI();
+function skipToNextPhase(){
+  if(phase<3){
+    playTransitionSound();
+    phase++;phaseElapsed=0;
+    startPhaseElapsed=elapsed;
+    startWallTime=Date.now();
+    startElapsed=elapsed;
+    updateUI();
+  } else {
+    running=false;
+    cancelAnimationFrame(timerRAF);
+    finishSession();
+  }
 }
 
-function reset(){
-  clearTimeout(timer);elapsed=0;phaseElapsed=0;phase=0;running=false;
+function resetState(){
+  cancelAnimationFrame(timerRAF);
+  elapsed=0;phaseElapsed=0;phase=0;running=false;
   resetSoundFlags();
-  $("noteInput").value="";$("noteArea").style.display="none";
-  $("doneBox").style.display="none";$("warnBox").style.display="none";
+  $("noteInput").value="";
+  $("noteArea").style.display="none";
+  $("doneBox").style.display="none";
+  $("warnBox").style.display="none";
   updateUI();
 }
 
+function finishSession(){
+  phase=4;running=false;cancelAnimationFrame(timerRAF);stopOvertimeBeeps();
+  const mins=Math.round(elapsed/60),note=$("noteInput").value;
+  const goalDone=$("goalCheck").checked;
+  const s={
+    day:getDay(),date:new Date().toLocaleDateString(),
+    dateStr:new Date().toDateString(),
+    time:new Date().toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}),
+    mins,note,duration:customDuration,goalDone
+  };
+  sessions.push(s);
+  try{localStorage.setItem("andySessions",JSON.stringify(sessions));}catch(e){}
+  const db=$("doneBox");db.style.display="block";
+  db.innerHTML="<strong>Day "+s.day+" complete!</strong> "+mins+"min "+(mins<=customDuration?"✓ on target":"— over target")+
+    (goalDone?" · ✅ Goal marked done":"")+
+    (note?'<br><em style="font-size:11px;display:block;margin-top:4px;">"'+note+'"</em>':"");
+  renderLogSection();renderStats();renderFullHistory();updateUI();
+}
+
+// ── Controls ──────────────────────────────────────────────────────
+function renderControls(){
+  const c=$("controls");c.innerHTML="";
+  const mk=(txt,cls,fn,flex)=>{
+    const b=document.createElement("button");
+    b.className="btn "+cls;
+    if(flex)b.style.flex="1";
+    b.textContent=txt;b.onclick=fn;c.appendChild(b);
+  };
+  if(phase===0){
+    mk("▶  Start day "+getDay()+" session","primary",startSession,true);
+  } else if(phase>=1&&phase<=3){
+    mk(running?"⏸  Pause":"▶  Resume","",togglePause,true);
+    mk(phase<3?"Next phase →":"✓  Finish","accent",skipToNextPhase,true);
+    mk("↺","",resetState);
+  } else if(phase===4){
+    mk("＋  Next day","primary",()=>{$("dayInput").value=getDay()+1;resetState();updateGoal();},true);
+    mk("↺ Reset","",resetState);
+  }
+}
+
+// ── Stats & History ───────────────────────────────────────────────
 function renderStats(){
   const today=new Date().toDateString();
-  const todaySess=sessions.filter(s=>s.dateStr===today);
-  $("statSessions").textContent=todaySess.length;
-  $("statMins").textContent=todaySess.reduce((a,s)=>a+s.mins,0);
+  const ts=sessions.filter(s=>s.dateStr===today);
+  $("statSessions").textContent=ts.length;
+  $("statMins").textContent=ts.reduce((a,s)=>a+s.mins,0);
   $("statStreak").textContent=calcStreak();
 }
 
@@ -533,44 +670,40 @@ function calcStreak(){
 function renderLogSection(){
   if(!sessions.length){$("logSection").style.display="none";return;}
   $("logSection").style.display="block";
-  $("toggleLog").onclick=()=>{const l=$("logList"),show=l.style.display==="none";l.style.display=show?"block":"none";$("toggleLog").textContent=show?"hide log":"show log";};
+  $("toggleLog").onclick=()=>{
+    const l=$("logList"),show=l.style.display==="none";
+    l.style.display=show?"block":"none";
+    $("toggleLog").textContent=show?"hide log":"show log";
+  };
   const list=$("logList");list.innerHTML="";
   sessions.slice().reverse().forEach(s=>{
     const row=document.createElement("div");row.className="log-row";
-    row.innerHTML='<div><div class="log-day">Day '+s.day+' &nbsp;·&nbsp; '+s.date+(s.duration&&s.duration!==60?' &nbsp;·&nbsp; '+s.duration+'min session':'')+'</div>'+(s.note?'<div class="log-note">'+s.note.slice(0,60)+(s.note.length>60?"…":"")+'</div>':"")+
-    '</div><div class="log-time" style="color:'+(s.mins<=(s.duration||60)?"var(--green)":"var(--red)")+'">'+s.mins+'m</div>';
+    const onTarget=s.mins<=(s.duration||60);
+    row.innerHTML='<div><div class="log-day">Day '+s.day+' &nbsp;·&nbsp; '+s.date+
+      (s.duration&&s.duration!==60?' · '+s.duration+'min':'')+
+      (s.goalDone?' · ✅':'')+'</div>'+
+      (s.note?'<div class="log-note">'+s.note.slice(0,60)+(s.note.length>60?"…":"")+'</div>':"")+
+      '</div><div class="log-time" style="color:'+(onTarget?"var(--green)":"var(--red)")+'">'+s.mins+'m</div>';
     list.appendChild(row);
   });
 }
 
-$("dayInput").addEventListener("change",()=>{reset();updateGoal();});
-
-// PWA
-const manifest={name:"90-Day Study Timer",short_name:"Study Timer",description:"Andy's Enterprise Tech Mastery Timer",start_url:"./index.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
-const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
-document.getElementById("manifestLink").href=URL.createObjectURL(blob);
-if("serviceWorker" in navigator){
-  const swCode=`const CACHE="study-timer-v2";self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll([self.location.pathname]))));self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(self.location.pathname)))));`;
-  const swBlob=new Blob([swCode],{type:"application/javascript"});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-}
-let deferredPrompt=null;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBanner").style.display="block";});
-$("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;$("installBanner").style.display="none";};
-$("dismissBtn").onclick=()=>{$("installBanner").style.display="none";};
-window.addEventListener("appinstalled",()=>{$("installBanner").style.display="none";});
-
 function renderFullHistory(){
-  const el=document.getElementById("fullHistoryList");
+  const el=$("fullHistoryList");
   if(!sessions.length){el.innerHTML='<div class="hist-empty">No sessions yet — start your first timer!</div>';return;}
-  el.innerHTML=sessions.slice().reverse().map(s=>`
-    <div class="history-item">
-      <div class="h-left">
-        <div class="h-day">Day ${s.day} &nbsp;·&nbsp; ${s.date}${s.duration&&s.duration!==60?' &nbsp;·&nbsp; '+s.duration+'min':''}</div>
+  el.innerHTML=sessions.slice().reverse().map(s=>{
+    const onTarget=s.mins<=(s.duration||60);
+    return`<div class="history-item">
+      <div>
+        <div class="h-day">Day ${s.day}${s.goalDone?' ✅':''}</div>
+        <div class="h-meta">${s.date}${s.time?' · '+s.time:''} · ${s.duration||60}min session</div>
         ${s.note?`<div class="h-note">"${s.note.slice(0,70)}${s.note.length>70?'…':''}"</div>`:''}
       </div>
-      <div class="h-dur" style="color:${s.mins<=(s.duration||60)?'#CCFBF1':'#FCA5A5'}">${s.mins}m</div>
-    </div>`).join('');
+      <div class="h-right">
+        <div class="h-dur" style="color:${onTarget?'#CCFBF1':'#FCA5A5'}">${s.mins}m</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function clearAllHistory(){
@@ -580,8 +713,40 @@ function clearAllHistory(){
   renderFullHistory();renderStats();renderLogSection();
 }
 
-// Init
-updateProgLabels();renderLogSection();renderStats();renderFullHistory();updateGoal();updateUI();
+// ── Streak alert ──────────────────────────────────────────────────
+function checkStreakAlert(){
+  if(!sessions.length)return;
+  const today=new Date().toDateString();
+  const studiedToday=sessions.some(s=>s.dateStr===today);
+  const streak=calcStreak();
+  if(!studiedToday&&streak>0){
+    $("streakAlert").style.display="block";
+  }
+}
+
+// ── PWA ───────────────────────────────────────────────────────────
+const manifest={name:"90-Day Study Timer",short_name:"Study Timer",start_url:"./index.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
+const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+$("manifestLink").href=URL.createObjectURL(blob);
+if("serviceWorker"in navigator){
+  const sw=`const C="st-v3";self.addEventListener("install",e=>e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.pathname]))));self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});
+}
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBanner").style.display="block";});
+$("installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBanner").style.display="none";};
+$("dismissBtn").onclick=()=>$("installBanner").style.display="none";
+window.addEventListener("appinstalled",()=>$("installBanner").style.display="none");
+$("dayInput").addEventListener("change",()=>{resetState();updateGoal();});
+
+// ── Init ──────────────────────────────────────────────────────────
+updateProgLabels();
+renderLogSection();
+renderStats();
+renderFullHistory();
+updateGoal();
+updateUI();
+checkStreakAlert();
 </script>
 </body>
 </html>
