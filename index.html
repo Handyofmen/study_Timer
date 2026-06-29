@@ -541,13 +541,22 @@ function tick(){
 
   // Auto-advance phase when phase time is up
   const cp=phase>=1&&phase<=3?PHASES[phase-1]:null;
-  if(cp&&phaseElapsed>=cp.mins*60&&phase<3){
-    playTransitionSound();
-    phase++;
-    startPhaseElapsed=elapsed;
-    phaseElapsed=0;
-    startWallTime=Date.now();
-    startElapsed=elapsed;
+  if(cp&&phaseElapsed>=cp.mins*60){
+    if(phase<3){
+      playTransitionSound();
+      phase++;
+      startPhaseElapsed=elapsed;
+      phaseElapsed=0;
+      startWallTime=Date.now();
+      startElapsed=elapsed;
+    } else {
+      // Document phase complete — finish session
+      running=false;
+      cancelAnimationFrame(timerRAF);
+      finishSession();
+      updateUI();
+      return;
+    }
   }
 
   updateUI();
@@ -587,10 +596,12 @@ function skipToNextPhase(){
     startWallTime=Date.now();
     startElapsed=elapsed;
     updateUI();
-  } else {
+  } else if(phase===3){
     running=false;
     cancelAnimationFrame(timerRAF);
+    stopOvertimeBeeps();
     finishSession();
+    updateUI();
   }
 }
 
@@ -639,6 +650,19 @@ function renderControls(){
     mk(running?"⏸  Pause":"▶  Resume","",togglePause,true);
     mk(phase<3?"Next phase →":"✓  Finish","accent",skipToNextPhase,true);
     mk("↺","",resetState);
+    // End early button on its own row
+    const endBtn=document.createElement("button");
+    endBtn.className="btn";
+    endBtn.style.cssText="width:100%;margin-top:6px;color:var(--red);border-color:var(--red);font-size:13px;padding:9px;";
+    endBtn.textContent="⏹  End session early";
+    endBtn.onclick=()=>{
+      running=false;
+      cancelAnimationFrame(timerRAF);
+      stopOvertimeBeeps();
+      finishSession();
+      updateUI();
+    };
+    c.appendChild(endBtn);
   } else if(phase===4){
     mk("＋  Next day","primary",()=>{$("dayInput").value=getDay()+1;resetState();updateGoal();},true);
     mk("↺ Reset","",resetState);
