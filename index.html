@@ -588,7 +588,7 @@ function tick() {
       // Document phase done — finish
       S.running = false;
       stopOvertime();
-      cancelAnimationFrame(S.rafId);
+      clearInterval(S.rafId);
       finishSession();
       refreshClock();
       return;
@@ -596,14 +596,20 @@ function tick() {
   }
 
   refreshClock();
-  S.rafId = requestAnimationFrame(tick);
 }
+
+// Visibility catch-up — instantly re-checks state the moment tab becomes visible again
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && S.running) {
+    tick(); // immediate catch-up check + sound trigger
+  }
+});
 
 // ═══════════════════════════════════════════════════
 // SESSION ACTIONS
 // ═══════════════════════════════════════════════════
 function startSession() {
-  cancelAnimationFrame(S.rafId);
+  clearInterval(S.rafId);
   S.elapsed = 0; S.phaseElapsed = 0; S.phaseIdx = 0;
   S.running = true; S.warned5 = false; S.playedEnd = false;
   S.wallStart = Date.now(); S.wallElapsed = 0; S.wallPhase = 0;
@@ -612,20 +618,20 @@ function startSession() {
   $("doneBox").style.display = "none";
   $("warnBox").style.display = "none";
   refreshClock();
-  S.rafId = requestAnimationFrame(tick);
+  S.rafId = setInterval(tick, 1000);
 }
 
 function pauseResume() {
   if (S.phaseIdx < 0 || S.phaseIdx > 2) return;
   if (S.running) {
     S.running = false;
-    cancelAnimationFrame(S.rafId);
+    clearInterval(S.rafId);
   } else {
     S.running = true;
     S.wallStart = Date.now();
     S.wallElapsed = S.elapsed;
     S.wallPhase = S.phaseElapsed;
-    S.rafId = requestAnimationFrame(tick);
+    S.rafId = setInterval(tick, 1000);
   }
   updateButtons();
 }
@@ -648,7 +654,7 @@ function nextPhase() {
 function endEarly() {
   if (S.phaseIdx < 0 || S.phaseIdx > 2) return;
   S.running = false;
-  cancelAnimationFrame(S.rafId);
+  clearInterval(S.rafId);
   stopOvertime();
   finishSession();
   refreshClock();
@@ -656,7 +662,7 @@ function endEarly() {
 
 function resetTimer() {
   S.running = false;
-  cancelAnimationFrame(S.rafId);
+  clearInterval(S.rafId);
   stopOvertime();
   S.elapsed = 0; S.phaseElapsed = 0; S.phaseIdx = -1;
   S.warned5 = false; S.playedEnd = false;
