@@ -46,6 +46,13 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 /* Streak alert */
 #streakAlert{background:var(--amberlt);border:1.5px solid var(--amber);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;color:#92400E;margin-bottom:12px;text-align:center;display:none;}
 
+/* Resume banner */
+#resumeBanner{background:#EFF6FF;border:1.5px solid var(--blue);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:#1E3A8A;margin-bottom:12px;text-align:center;display:none;}
+#resumeBanner .rrow{display:flex;gap:8px;margin-top:8px;}
+#resumeBanner button{flex:1;padding:8px;border-radius:8px;border:none;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;}
+#resumeBanner .rgo{background:var(--blue);color:#fff;}
+#resumeBanner .rdis{background:#fff;color:var(--blue);border:1.5px solid var(--blue)!important;}
+
 /* Card */
 .card{background:var(--card);border-radius:20px;padding:22px 20px;box-shadow:var(--shadow);}
 
@@ -148,6 +155,12 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 .legitem .ld{color:#CCFBF1;font-size:10px;margin-top:2px;}
 .footer{text-align:center;margin-top:10px;color:rgba(255,255,255,0.5);font-size:11px;}
 
+/* Backup row */
+.backuprow{display:flex;gap:8px;max-width:480px;margin-top:14px;width:100%;}
+.backuprow button{flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;}
+.backuprow button:hover{background:rgba(255,255,255,0.18);}
+#importFile{display:none;}
+
 /* Full history */
 .histsec{max-width:480px;margin-top:16px;}
 .histsec h2{font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
@@ -178,20 +191,28 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 
   <div id="streakAlert"></div>
 
+  <div id="resumeBanner">
+    <div id="resumeText"></div>
+    <div class="rrow">
+      <button class="rgo" id="btnResumeGo">Resume session</button>
+      <button class="rdis" id="btnResumeDiscard">Discard</button>
+    </div>
+  </div>
+
   <div class="card">
 
     <!-- Duration -->
     <div class="slabel">Session Duration</div>
     <div class="presets">
-      <button class="pre" data-min="15">15 min</button>
-      <button class="pre" data-min="30">30 min</button>
-      <button class="pre" data-min="45">45 min</button>
-      <button class="pre on" data-min="60">60 min</button>
-      <button class="pre" data-min="90">90 min</button>
-      <button class="pre" data-min="120">120 min</button>
+      <button class="pre" data-min="15" aria-label="15 minute session">15 min</button>
+      <button class="pre" data-min="30" aria-label="30 minute session">30 min</button>
+      <button class="pre" data-min="45" aria-label="45 minute session">45 min</button>
+      <button class="pre on" data-min="60" aria-label="60 minute session">60 min</button>
+      <button class="pre" data-min="90" aria-label="90 minute session">90 min</button>
+      <button class="pre" data-min="120" aria-label="120 minute session">120 min</button>
     </div>
     <div class="crow">
-      <label>Custom:</label>
+      <label for="customIn">Custom:</label>
       <input type="number" id="customIn" min="1" max="480" placeholder="mins"/>
       <button class="cbtn" id="setCustom">Set</button>
     </div>
@@ -202,7 +223,7 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
     <!-- Day + Goal -->
     <div class="dayrow">
       <div class="daybox">
-        <label>Day</label>
+        <label for="dayIn">Day</label>
         <input type="number" id="dayIn" min="1" max="90" value="1"/>
       </div>
       <div class="goalbox">
@@ -251,7 +272,7 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
     <!-- Buttons — static, wired once -->
     <div class="btnrow">
       <button class="btn navy" id="btnStart">▶&nbsp; Start session</button>
-      <button class="btn sm" id="btnReset" title="Reset">↺</button>
+      <button class="btn sm" id="btnReset" title="Reset" aria-label="Reset timer">↺</button>
     </div>
     <div class="btnrow2">
       <button class="btn teal" id="btnNext" disabled>Next phase →</button>
@@ -260,7 +281,7 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 
     <!-- Note -->
     <div class="notearea" id="noteArea">
-      <label>Daily Reflection (fill during Document phase)</label>
+      <label for="noteIn">Daily Reflection (fill during Document phase)</label>
       <textarea id="noteIn" rows="2" placeholder="What did I build? Why does this feature matter for my career?"></textarea>
     </div>
 
@@ -269,6 +290,7 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
       <div class="statcard"><div class="sv" id="stSess">0</div><div class="sl">Sessions Today</div></div>
       <div class="statcard"><div class="sv" id="stMins">0</div><div class="sl">Total Mins</div></div>
       <div class="statcard"><div class="sv" id="stStreak">0</div><div class="sl">Day Streak</div></div>
+      <div class="statcard"><div class="sv" id="stBest">0</div><div class="sl">Best Streak</div></div>
     </div>
 
     <!-- Session log -->
@@ -288,6 +310,13 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
     <div class="legitem"><div class="ll">DOCUMENT</div><div class="ld">15 min · reflect</div></div>
   </div>
   <div class="footer">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
+
+  <!-- Backup -->
+  <div class="backuprow">
+    <button id="btnExport">⬇ Export backup</button>
+    <button id="btnImport">⬆ Import backup</button>
+    <input type="file" id="importFile" accept="application/json"/>
+  </div>
 
   <!-- Full history -->
   <div class="histsec">
@@ -317,6 +346,27 @@ const PHASES = [
    motiv:"Document now while it's fresh — this is your portfolio evidence."},
 ];
 const HARDCAP = 5400; // 90 min absolute max
+
+// Phase context (tool focus) per day range, used to build a fallback goal
+// when a day isn't explicitly listed in GOALS below.
+const PHASE_RANGES = [
+  {start:1,  end:11, tool:"Slack"},
+  {start:12, end:30, tool:"Slack / Trello deep-practice & review"},
+  {start:31, end:38, tool:"Notion"},
+  {start:39, end:45, tool:"Notion deep-practice & review"},
+  {start:46, end:50, tool:"Asana"},
+  {start:51, end:60, tool:"Asana deep-practice & review"},
+  {start:61, end:65, tool:"HubSpot"},
+  {start:66, end:75, tool:"HubSpot deep-practice & review"},
+  {start:76, end:80, tool:"Zapier"},
+  {start:81, end:88, tool:"Zapier deep-practice & Integration Map"},
+  {start:89, end:90, tool:"Final portfolio wrap-up"},
+];
+function toolForDay(d) {
+  const r = PHASE_RANGES.find(r => d >= r.start && d <= r.end);
+  return r ? r.tool : "Enterprise Tech";
+}
+
 const GOALS = {
   1:"Slack: workspace setup, channel architecture, pin a message",
   2:"Slack: master threads, emoji reactions, save/bookmark",
@@ -355,6 +405,11 @@ const GOALS = {
   89:"Final: write your 150-word 'What I Built in 90 Days' summary",
   90:"Final: upload all certification badges to LinkedIn — you're done!",
 };
+
+function goalForDay(d) {
+  if (GOALS[d]) return GOALS[d];
+  return toolForDay(d) + " — Day " + d + ": deep-practice & review block. Revisit weaker workflows from this phase, redo one exercise from memory, and update your Control Center document.";
+}
 
 // ═══════════════════════════════════════════════════
 // STATE — single source of truth
@@ -404,6 +459,18 @@ function playTransition() { tone(600,'sine',0,0.12,0.25); tone(750,'sine',0.16,0
 function playOvertime()   { tone(300,'triangle',0,0.25,0.2); }
 function stopOvertime()   { if (S.overtimeInt) { clearInterval(S.overtimeInt); S.overtimeInt = null; } }
 
+// Browser notifications — backstop for chimes when tab is backgrounded
+function notify(title, body) {
+  try {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, {body, icon: ICON_DATA_URI});
+    }
+  } catch(e) {}
+}
+if ("Notification" in window && Notification.permission === "default") {
+  // Ask once, quietly, the first time a session is started (see startSession)
+}
+
 // ═══════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════
@@ -415,6 +482,77 @@ const fmt = s => {
 function getDay() { return Math.max(1, Math.min(90, parseInt($("dayIn").value) || 1)); }
 function save()   { try { localStorage.setItem("andySessions", JSON.stringify(S.sessions)); } catch(e) {} }
 function saveGoalChecks() { try { localStorage.setItem("andyGoalChecks", JSON.stringify(S.goalChecks)); } catch(e) {} }
+function saveLastDay(d) { try { localStorage.setItem("andyLastDay", String(d)); } catch(e) {} }
+function getLastDay() { return parseInt(localStorage.getItem("andyLastDay") || "1"); }
+
+// ═══════════════════════════════════════════════════
+// CRASH-RECOVERY PERSISTENCE
+// In-progress session state is snapshotted continuously so a closed tab,
+// killed app, or reload mid-session can be resumed instead of losing the
+// session entirely.
+// ═══════════════════════════════════════════════════
+function persistLive() {
+  if (S.phaseIdx < 0 || S.phaseIdx > 2) { clearLive(); return; }
+  try {
+    localStorage.setItem("andyLiveSession", JSON.stringify({
+      day: getDay(),
+      duration: S.duration,
+      totalSecs: S.totalSecs,
+      elapsed: S.elapsed,
+      phaseIdx: S.phaseIdx,
+      phaseElapsed: S.phaseElapsed,
+      note: $("noteIn") ? $("noteIn").value : "",
+      goalDone: $("goalChk") ? $("goalChk").checked : false,
+      savedAt: Date.now(),
+    }));
+  } catch(e) {}
+}
+function clearLive() { try { localStorage.removeItem("andyLiveSession"); } catch(e) {} }
+function loadLive() {
+  try {
+    const raw = localStorage.getItem("andyLiveSession");
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function offerResume() {
+  const live = loadLive();
+  if (!live) return;
+  // Account for time that passed while the app was closed/backgrounded
+  const idleSecs = Math.floor((Date.now() - live.savedAt) / 1000);
+  const projectedElapsed = Math.min(live.elapsed + idleSecs, HARDCAP);
+
+  const banner = $("resumeBanner");
+  $("resumeText").textContent = "You have an unfinished Day " + live.day + " session (" +
+    fmt(live.elapsed) + " logged before it closed). Resume where you left off?";
+  banner.style.display = "block";
+
+  $("btnResumeGo").onclick = () => {
+    $("dayIn").value = live.day;
+    S.duration = live.duration; S.totalSecs = live.totalSecs;
+    S.elapsed = projectedElapsed;
+    S.phaseIdx = live.phaseIdx;
+    // Re-derive phase elapsed proportionally if we fast-forwarded past a phase boundary,
+    // simplest safe approach: keep phase elapsed but cap it at phase length.
+    S.phaseElapsed = Math.min(live.phaseElapsed + idleSecs, PHASES[Math.min(live.phaseIdx,2)].mins*60);
+    S.running = true;
+    S.wallStart = Date.now(); S.wallElapsed = S.elapsed; S.wallPhase = S.phaseElapsed;
+    S.warned5 = S.elapsed >= S.totalSecs - 300;
+    S.playedEnd = S.elapsed >= S.totalSecs;
+    document.querySelectorAll(".pre").forEach(b => b.classList.toggle("on", +b.dataset.min === S.duration));
+    $("noteArea").style.display = "block";
+    if (live.note) $("noteIn").value = live.note;
+    $("goalChk").checked = !!live.goalDone;
+    updateProgLabels();
+    banner.style.display = "none";
+    refreshClock();
+    S.rafId = setInterval(tick, 1000);
+  };
+  $("btnResumeDiscard").onclick = () => {
+    clearLive();
+    banner.style.display = "none";
+  };
+}
 
 // ═══════════════════════════════════════════════════
 // DURATION CONTROL
@@ -439,7 +577,7 @@ function updateProgLabels() {
 // ═══════════════════════════════════════════════════
 function updateGoal() {
   const d = getDay();
-  $("goalTxt").textContent = GOALS[d] || "Day " + d + " — refer to your workbook for today's goal";
+  $("goalTxt").textContent = goalForDay(d);
   $("goalChk").checked = !!S.goalChecks["d" + d];
 }
 
@@ -555,12 +693,14 @@ function tick() {
   if (!S.warned5 && S.elapsed >= S.totalSecs - 300 && S.elapsed < S.totalSecs) {
     S.warned5 = true;
     playWarning();
+    notify("5 minutes left", "Day " + getDay() + " session is wrapping up soon.");
   }
 
   // Session end chime
   if (!S.playedEnd && S.elapsed >= S.totalSecs) {
     S.playedEnd = true;
     playChime();
+    notify("Session target reached", "Day " + getDay() + " — finish the Document phase when ready.");
     S.overtimeInt = setInterval(() => { if (S.running && S.elapsed >= S.totalSecs) playOvertime(); }, 60000);
   }
 
@@ -579,6 +719,7 @@ function tick() {
   if (cp && S.phaseElapsed >= cp.mins * 60) {
     if (S.phaseIdx < 2) {
       playTransition();
+      notify("Phase complete", PHASES[S.phaseIdx].label + " done — moving to " + PHASES[S.phaseIdx+1].label + ".");
       S.phaseIdx++;
       S.phaseElapsed = 0;
       S.wallPhase = 0;
@@ -596,6 +737,7 @@ function tick() {
   }
 
   refreshClock();
+  persistLive();
 }
 
 // Visibility catch-up — instantly re-checks state the moment tab becomes visible again
@@ -604,6 +746,10 @@ document.addEventListener("visibilitychange", () => {
     tick(); // immediate catch-up check + sound trigger
   }
 });
+
+// Snapshot right before the page is torn down, as a final safety net
+window.addEventListener("beforeunload", persistLive);
+window.addEventListener("pagehide", persistLive);
 
 // ═══════════════════════════════════════════════════
 // SESSION ACTIONS
@@ -617,7 +763,12 @@ function startSession() {
   $("noteArea").style.display = "block";
   $("doneBox").style.display = "none";
   $("warnBox").style.display = "none";
+  saveLastDay(getDay());
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission().catch(()=>{});
+  }
   refreshClock();
+  persistLive();
   S.rafId = setInterval(tick, 1000);
 }
 
@@ -626,6 +777,7 @@ function pauseResume() {
   if (S.running) {
     S.running = false;
     clearInterval(S.rafId);
+    persistLive();
   } else {
     S.running = true;
     S.wallStart = Date.now();
@@ -646,6 +798,7 @@ function nextPhase() {
     S.wallStart = Date.now();
     S.wallElapsed = S.elapsed;
     refreshClock();
+    persistLive();
   } else {
     endEarly();
   }
@@ -670,11 +823,13 @@ function resetTimer() {
   $("noteArea").style.display = "none";
   $("doneBox").style.display = "none";
   $("warnBox").style.display = "none";
+  clearLive();
   refreshClock();
 }
 
 function nextDay() {
   $("dayIn").value = getDay() + 1;
+  saveLastDay(getDay());
   resetTimer();
   updateGoal();
 }
@@ -693,6 +848,8 @@ function finishSession() {
   };
   S.sessions.push(rec);
   save();
+  clearLive();
+  saveLastDay(rec.day);
   const db = $("doneBox");
   db.style.display = "block";
   db.innerHTML = "<strong>Day " + rec.day + " complete!</strong> " + mins + " min " +
@@ -712,19 +869,34 @@ function renderStats() {
   const ts = S.sessions.filter(s => s.dateStr === today);
   $("stSess").textContent = ts.length;
   $("stMins").textContent = ts.reduce((a, s) => a + s.mins, 0);
-  $("stStreak").textContent = calcStreak();
+  const streaks = calcStreaks();
+  $("stStreak").textContent = streaks.current;
+  $("stBest").textContent = streaks.best;
 }
-function calcStreak() {
-  if (!S.sessions.length) return 0;
+function calcStreaks() {
+  if (!S.sessions.length) return {current:0, best:0};
   const days = [...new Set(S.sessions.map(s => s.dateStr))];
-  let streak = 0;
+  const dayTimes = days.map(d => new Date(d).getTime()).sort((a,b)=>a-b);
+
+  // Current streak: consecutive days ending today (or yesterday, if today not yet studied)
+  let current = 0;
   const today = new Date();
   for (let i = 0; i < 365; i++) {
     const d = new Date(today); d.setDate(d.getDate() - i);
-    if (days.includes(d.toDateString())) streak++;
+    if (days.includes(d.toDateString())) current++;
     else break;
   }
-  return streak;
+
+  // Best streak: longest run of consecutive calendar days across all history
+  let best = 1, run = 1;
+  const ONE_DAY = 86400000;
+  for (let i = 1; i < dayTimes.length; i++) {
+    if (Math.round((dayTimes[i] - dayTimes[i-1]) / ONE_DAY) === 1) run++;
+    else run = 1;
+    if (run > best) best = run;
+  }
+  best = Math.max(best, current);
+  return {current, best};
 }
 
 // ═══════════════════════════════════════════════════
@@ -735,15 +907,26 @@ function renderLog() {
   if (!S.sessions.length) { sec.style.display = "none"; return; }
   sec.style.display = "block";
   const list = $("logList"); list.innerHTML = "";
-  S.sessions.slice().reverse().forEach(s => {
+  S.sessions.slice().reverse().forEach((s, revIdx) => {
     const ok = s.mins <= (s.duration || 60);
+    const realIdx = S.sessions.length - 1 - revIdx;
     const row = document.createElement("div"); row.className = "logrow";
     row.innerHTML = '<div><div class="logday">Day ' + s.day + ' · ' + s.date +
       (s.duration && s.duration !== 60 ? ' · ' + s.duration + 'min' : '') +
       (s.goalDone ? ' · ✅' : '') + '</div>' +
       (s.note ? '<div class="lognote">' + s.note.slice(0,60) + (s.note.length>60?"…":"") + '</div>' : "") +
-      '</div><div class="logtime" style="color:' + (ok ? "var(--green)" : "var(--red)") + '">' + s.mins + 'm</div>';
+      '</div><div style="display:flex;align-items:center;gap:8px;"><div class="logtime" style="color:' + (ok ? "var(--green)" : "var(--red)") + '">' + s.mins + 'm</div>' +
+      '<button class="cbtn" data-del="' + realIdx + '" style="padding:4px 8px;font-size:11px;" aria-label="Delete entry">✕</button></div>';
     list.appendChild(row);
+  });
+  list.querySelectorAll("[data-del]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = +btn.dataset.del;
+      if (!confirm("Delete this log entry? This cannot be undone.")) return;
+      S.sessions.splice(idx, 1);
+      save();
+      renderLog(); renderStats(); renderHistory();
+    });
   });
 }
 
@@ -776,11 +959,59 @@ function checkStreakAlert() {
   if (!S.sessions.length) return;
   const today = new Date().toDateString();
   const studiedToday = S.sessions.some(s => s.dateStr === today);
-  if (!studiedToday && calcStreak() > 0) {
+  if (!studiedToday && calcStreaks().current > 0) {
     const el = $("streakAlert");
     el.textContent = "⚠️ Your streak is at risk — you haven't studied today yet. Start your session!";
     el.style.display = "block";
   }
+}
+
+// ═══════════════════════════════════════════════════
+// BACKUP / EXPORT / IMPORT
+// ═══════════════════════════════════════════════════
+function exportBackup() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    sessions: S.sessions,
+    goalChecks: S.goalChecks,
+    lastDay: getLastDay(),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = "study-timer-backup-" + stamp + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function importBackup(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.sessions)) throw new Error("bad format");
+      const merge = confirm(
+        "Found " + data.sessions.length + " session(s) in this backup.\n\n" +
+        "OK = Merge with existing data\nCancel = Replace existing data entirely"
+      );
+      if (merge) {
+        const seen = new Set(S.sessions.map(s => s.day + "|" + s.date + "|" + s.time));
+        data.sessions.forEach(s => {
+          const key = s.day + "|" + s.date + "|" + s.time;
+          if (!seen.has(key)) { S.sessions.push(s); seen.add(key); }
+        });
+      } else {
+        S.sessions = data.sessions;
+      }
+      if (data.goalChecks) Object.assign(S.goalChecks, data.goalChecks);
+      save(); saveGoalChecks();
+      renderStats(); renderLog(); renderHistory(); checkStreakAlert();
+      alert("Backup imported successfully.");
+    } catch(e) {
+      alert("Couldn't read that file — make sure it's a Study Timer backup JSON.");
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ═══════════════════════════════════════════════════
@@ -807,12 +1038,13 @@ $("setCustom").addEventListener("click", () => {
 $("testSnd").addEventListener("click", () => playChime());
 
 // Day input
-$("dayIn").addEventListener("change", () => { resetTimer(); updateGoal(); });
+$("dayIn").addEventListener("change", () => { saveLastDay(getDay()); resetTimer(); updateGoal(); });
 
 // Goal checkbox
 $("goalChk").addEventListener("change", () => {
   S.goalChecks["d" + getDay()] = $("goalChk").checked;
   saveGoalChecks();
+  persistLive();
 });
 
 // Start / Pause / Resume / Next day
@@ -829,7 +1061,12 @@ $("btnNext").addEventListener("click", () => nextPhase());
 $("btnEnd").addEventListener("click", () => endEarly());
 
 // Reset
-$("btnReset").addEventListener("click", () => resetTimer());
+$("btnReset").addEventListener("click", () => {
+  if (S.phaseIdx >= 0 && S.phaseIdx <= 2) {
+    if (!confirm("Reset will discard the current in-progress session. Continue?")) return;
+  }
+  resetTimer();
+});
 
 // Toggle log
 $("btnToggleLog").addEventListener("click", () => {
@@ -849,10 +1086,20 @@ $("btnClrHist").addEventListener("click", () => {
   renderLog();
 });
 
+// Export / Import
+$("btnExport").addEventListener("click", exportBackup);
+$("btnImport").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) importBackup(file);
+  e.target.value = "";
+});
+
 // ═══════════════════════════════════════════════════
 // PWA
 // ═══════════════════════════════════════════════════
-const mf = {name:"90-Day Study Timer",short_name:"Study Timer",start_url:"./index.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
+const ICON_DATA_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231B3A6B'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E";
+const mf = {name:"90-Day Study Timer",short_name:"Study Timer",start_url:"./index.html",display:"standalone",background_color:"#1B3A6B",theme_color:"#1B3A6B",icons:[{src:ICON_DATA_URI,sizes:"any",type:"image/svg+xml"}]};
 $("manifestLink").href = URL.createObjectURL(new Blob([JSON.stringify(mf)], {type:"application/json"}));
 if ("serviceWorker" in navigator) {
   const sw = `const C="st-v4";self.addEventListener("install",e=>e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.pathname]))));self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
@@ -867,6 +1114,19 @@ window.addEventListener("appinstalled", () => $("installBanner").style.display =
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+// Default the day field to (last logged day + 1) if the user hasn't
+// manually changed it yet this load, so Andy isn't stuck re-typing his
+// day number every single time he opens the app.
+(function initDay(){
+  const last = getLastDay();
+  let suggested = last;
+  if (S.sessions.length) {
+    const maxDay = Math.max(...S.sessions.map(s => s.day));
+    suggested = Math.min(90, maxDay + 1);
+  }
+  $("dayIn").value = Math.max(1, Math.min(90, suggested));
+})();
+
 updateProgLabels();
 updateGoal();
 refreshClock();
@@ -874,6 +1134,7 @@ renderStats();
 renderLog();
 renderHistory();
 checkStreakAlert();
+offerResume();
 </script>
 </body>
 </html>
