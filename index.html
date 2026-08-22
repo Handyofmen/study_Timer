@@ -178,6 +178,29 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 #installBanner{display:none;position:fixed;bottom:0;left:0;right:0;background:#1B3A6B;color:#fff;padding:14px 20px;text-align:center;font-size:14px;font-weight:500;box-shadow:0 -4px 20px rgba(0,0,0,0.3);z-index:999;}
 #installBanner button{margin-left:12px;padding:6px 16px;background:#0D9488;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
 #installBanner .dis{margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.4);}
+
+/* Project bar */
+.projectbar{display:flex;gap:6px;max-width:480px;width:100%;margin:0 auto 12px;}
+.projectbar select{flex:1;padding:9px 10px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.14);color:#fff;font-size:13px;font-weight:600;font-family:inherit;outline:none;}
+.projectbar select option{color:#111;}
+.projectbar button{padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.14);color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;}
+.projectbar button:hover{background:rgba(255,255,255,0.24);}
+
+/* Project modal */
+.modalOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modalOverlay.show{display:flex;}
+.modalCard{background:var(--card);border-radius:16px;padding:20px;max-width:420px;width:100%;box-shadow:var(--shadow);}
+.modalCard h2{font-size:16px;color:var(--text);}
+.modalCard label{display:block;font-size:10px;font-weight:700;color:var(--textmd);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 5px;}
+.modalCard input[type=text]{width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;outline:none;}
+.modalCard input[type=text]:focus{border-color:var(--navy);}
+.modalCard select{width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+.modalCard select:focus{border-color:var(--navy);}
+.modalCard textarea{width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;line-height:1.5;}
+.modalCard textarea:focus{border-color:var(--navy);}
+.modalHint{font-size:11px;color:var(--textsm);margin-top:6px;line-height:1.45;}
+.modalRow{display:flex;gap:8px;margin-top:18px;}
+.modalRow .btn{flex:1;}
 </style>
 </head>
 <body>
@@ -185,8 +208,14 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 <div class="container">
 
   <div class="header">
-    <h1>⏱ 90-Day Study Timer</h1>
-    <p>Andy's Enterprise Tech Mastery &nbsp;·&nbsp; Flexible focus sessions</p>
+    <h1 id="appTitle">⏱ 90-Day Study Timer</h1>
+    <p id="appSubtitle">Andy's Enterprise Tech Mastery &nbsp;·&nbsp; Flexible focus sessions</p>
+  </div>
+
+  <div class="projectbar">
+    <select id="projectSelect" aria-label="Select project"></select>
+    <button id="btnNewProject" class="cbtn" title="Create new project">+ New</button>
+    <button id="btnDelProject" class="cbtn" title="Delete this project" style="display:none;">🗑</button>
   </div>
 
   <div id="streakAlert"></div>
@@ -304,12 +333,12 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
 
   </div><!-- /card -->
 
-  <div class="legend">
+  <div class="legend" id="legendBox">
     <div class="legitem"><div class="ll">INPUT</div><div class="ld">15 min · watch/read</div></div>
     <div class="legitem"><div class="ll">BUILD</div><div class="ld">30 min · implement</div></div>
     <div class="legitem"><div class="ll">DOCUMENT</div><div class="ld">15 min · reflect</div></div>
   </div>
-  <div class="footer">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
+  <div class="footer" id="footerText">Flexible duration &nbsp;·&nbsp; 90 min hard cap &nbsp;·&nbsp; Consistency beats intensity</div>
 
   <!-- Backup -->
   <div class="backuprow">
@@ -333,19 +362,64 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
   <button class="dis" id="btnDismiss">✕</button>
 </div>
 
+<div id="projectModal" class="modalOverlay">
+  <div class="modalCard">
+    <h2>New Project</h2>
+    <label for="npName">Project name</label>
+    <input type="text" id="npName" placeholder="e.g. Handyofmen Ops, YouTube Scripts, Job Search"/>
+    <label for="npTemplate">Session structure</label>
+    <select id="npTemplate"></select>
+    <label for="npGoals">Day goals (optional)</label>
+    <textarea id="npGoals" rows="5" placeholder="1: Draft video script&#10;2: Record voiceover&#10;3: Edit + upload"></textarea>
+    <div class="modalHint">One goal per line, format "day: goal". Days without a listed goal fall back to a generic "Day N — focus session" label. Leave blank to skip goals entirely.</div>
+    <div class="modalRow">
+      <button id="npCancel" class="btn">Cancel</button>
+      <button id="npSave" class="btn navy">Create project</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════
-const PHASES = [
-  {label:"Input",    mins:15, color:"#2563EB", inner:"#DBEAFE",
-   motiv:"Stay focused — absorb the concept fully before moving on."},
-  {label:"Build",    mins:30, color:"#0D9488", inner:"#CCFBF1",
-   motiv:"Build it, don't just read it. Hands on keyboard beats eyes on screen."},
-  {label:"Document", mins:15, color:"#EA580C", inner:"#FFF7ED",
-   motiv:"Document now while it's fresh — this is your portfolio evidence."},
-];
-const HARDCAP = 5400; // 90 min absolute max
+const PHASE_TEMPLATES = {
+  standard: {
+    label: "Input / Build / Document (default)",
+    hardcapSecs: 5400, // 90 min absolute max
+    phases: [
+      {label:"Input",    mins:15, color:"#2563EB", inner:"#DBEAFE",
+       motiv:"Stay focused — absorb the concept fully before moving on."},
+      {label:"Build",    mins:30, color:"#0D9488", inner:"#CCFBF1",
+       motiv:"Build it, don't just read it. Hands on keyboard beats eyes on screen."},
+      {label:"Document", mins:15, color:"#EA580C", inner:"#FFF7ED",
+       motiv:"Document now while it's fresh — this is your portfolio evidence."},
+    ],
+  },
+  pomodoro: {
+    label: "Classic Pomodoro (25 work / 5 break)",
+    hardcapSecs: 2400, // 40 min absolute max
+    phases: [
+      {label:"Focus", mins:25, color:"#DC2626", inner:"#FEE2E2",
+       motiv:"Heads down — single task, no switching."},
+      {label:"Break", mins:5,  color:"#16A34A", inner:"#DCFCE7",
+       motiv:"Step away. Stretch, hydrate, look away from the screen."},
+    ],
+  },
+  single: {
+    label: "Single Focus Block (no sub-phases)",
+    hardcapSecs: 5400, // 90 min absolute max
+    phases: [
+      {label:"Focus", mins:60, color:"#1B3A6B", inner:"#DBEAFE",
+       motiv:"One block, one task. Go deep — no switching gears."},
+    ],
+  },
+};
+function currentPhases()  { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).phases; }
+function currentHardcap() { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).hardcapSecs; }
+function lastPhaseIdx()   { return currentPhases().length - 1; }
+function doneIdx()        { return currentPhases().length; }
+function isDonePhase(i)   { return i === doneIdx(); }
 
 // Phase context (tool focus) per day range, used to build a fallback goal
 // when a day isn't explicitly listed in GOALS below.
@@ -362,7 +436,7 @@ const PHASE_RANGES = [
   {start:81, end:88, tool:"Zapier deep-practice & Integration Map"},
   {start:89, end:90, tool:"Final portfolio wrap-up"},
 ];
-function toolForDay(d) {
+function toolForDayBuiltin(d) {
   const r = PHASE_RANGES.find(r => d >= r.start && d <= r.end);
   return r ? r.tool : "Enterprise Tech";
 }
@@ -406,9 +480,65 @@ const GOALS = {
   90:"Final: upload all certification badges to LinkedIn — you're done!",
 };
 
+const BUILTIN_PROJECT = {
+  id: "enterprise90",
+  builtin: true,
+  name: "90-Day Enterprise Tech Mastery",
+  title: "⏱ 90-Day Study Timer",
+  subtitle: "Andy's Enterprise Tech Mastery",
+  maxDay: 90,
+  goals: GOALS,
+  phaseTemplate: "standard",
+};
+
 function goalForDay(d) {
-  if (GOALS[d]) return GOALS[d];
-  return toolForDay(d) + " — Day " + d + ": deep-practice & review block. Revisit weaker workflows from this phase, redo one exercise from memory, and update your Control Center document.";
+  const p = activeProject();
+  if (p.goals && p.goals[d]) return p.goals[d];
+  if (p.builtin) {
+    return toolForDayBuiltin(d) + " — Day " + d + ": deep-practice & review block. Revisit weaker workflows from this phase, redo one exercise from memory, and update your Control Center document.";
+  }
+  return "Day " + d + " — set a focus goal for this session.";
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECTS — custom projects are stored separately from
+// the built-in 90-Day program, which is never overwritten
+// ═══════════════════════════════════════════════════
+function loadCustomProjects() {
+  try { return JSON.parse(localStorage.getItem("timerProjects") || "[]"); } catch(e) { return []; }
+}
+function saveCustomProjects(list) { try { localStorage.setItem("timerProjects", JSON.stringify(list)); } catch(e) {} }
+function allProjects() { return [BUILTIN_PROJECT, ...loadCustomProjects()]; }
+function getProject(id) { return allProjects().find(p => p.id === id) || BUILTIN_PROJECT; }
+function getActiveProjectId() { return localStorage.getItem("activeProjectId") || BUILTIN_PROJECT.id; }
+function setActiveProjectId(id) { try { localStorage.setItem("activeProjectId", id); } catch(e) {} }
+function activeProject() { return getProject(getActiveProjectId()); }
+
+// Per-project storage keys, so sessions/goals/streaks never mix across projects
+function keySessions(pid)   { return "sessions_" + pid; }
+function keyGoalChecks(pid) { return "goalChecks_" + pid; }
+function keyLastDay(pid)    { return "lastDay_" + pid; }
+function keyLive(pid)       { return "liveSession_" + pid; }
+
+// One-time migration: fold pre-existing (pre-multi-project) data into the
+// built-in 90-Day project so no history is lost.
+function migrateLegacyData() {
+  if (localStorage.getItem("legacyMigrated_v1")) return;
+  try {
+    const pairs = [
+      ["andySessions", keySessions(BUILTIN_PROJECT.id)],
+      ["andyGoalChecks", keyGoalChecks(BUILTIN_PROJECT.id)],
+      ["andyLastDay", keyLastDay(BUILTIN_PROJECT.id)],
+      ["andyLiveSession", keyLive(BUILTIN_PROJECT.id)],
+    ];
+    pairs.forEach(([oldKey, newKey]) => {
+      const v = localStorage.getItem(oldKey);
+      if (v !== null && localStorage.getItem(newKey) === null) {
+        localStorage.setItem(newKey, v);
+      }
+    });
+  } catch(e) {}
+  try { localStorage.setItem("legacyMigrated_v1", "1"); } catch(e) {}
 }
 
 // ═══════════════════════════════════════════════════
@@ -427,10 +557,16 @@ const S = {
   warned5: false,
   playedEnd: false,
   overtimeInt: null,
-  sessions: JSON.parse(localStorage.getItem("andySessions") || "[]"),
-  goalChecks: JSON.parse(localStorage.getItem("andyGoalChecks") || "{}"),
+  sessions: [],
+  goalChecks: {},
   rafId: null,
 };
+
+function loadProjectData() {
+  const pid = getActiveProjectId();
+  try { S.sessions = JSON.parse(localStorage.getItem(keySessions(pid)) || "[]"); } catch(e) { S.sessions = []; }
+  try { S.goalChecks = JSON.parse(localStorage.getItem(keyGoalChecks(pid)) || "{}"); } catch(e) { S.goalChecks = {}; }
+}
 
 // ═══════════════════════════════════════════════════
 // AUDIO ENGINE
@@ -479,11 +615,14 @@ const fmt = s => {
   const a = Math.abs(s);
   return (s < 0 ? "-" : "") + String(Math.floor(a/60)).padStart(2,"0") + ":" + String(a%60).padStart(2,"0");
 };
-function getDay() { return Math.max(1, Math.min(90, parseInt($("dayIn").value) || 1)); }
-function save()   { try { localStorage.setItem("andySessions", JSON.stringify(S.sessions)); } catch(e) {} }
-function saveGoalChecks() { try { localStorage.setItem("andyGoalChecks", JSON.stringify(S.goalChecks)); } catch(e) {} }
-function saveLastDay(d) { try { localStorage.setItem("andyLastDay", String(d)); } catch(e) {} }
-function getLastDay() { return parseInt(localStorage.getItem("andyLastDay") || "1"); }
+function getDay() {
+  const max = activeProject().maxDay || 9999;
+  return Math.max(1, Math.min(max, parseInt($("dayIn").value) || 1));
+}
+function save()   { try { localStorage.setItem(keySessions(getActiveProjectId()), JSON.stringify(S.sessions)); } catch(e) {} }
+function saveGoalChecks() { try { localStorage.setItem(keyGoalChecks(getActiveProjectId()), JSON.stringify(S.goalChecks)); } catch(e) {} }
+function saveLastDay(d) { try { localStorage.setItem(keyLastDay(getActiveProjectId()), String(d)); } catch(e) {} }
+function getLastDay() { return parseInt(localStorage.getItem(keyLastDay(getActiveProjectId())) || "1"); }
 
 // ═══════════════════════════════════════════════════
 // CRASH-RECOVERY PERSISTENCE
@@ -492,9 +631,9 @@ function getLastDay() { return parseInt(localStorage.getItem("andyLastDay") || "
 // session entirely.
 // ═══════════════════════════════════════════════════
 function persistLive() {
-  if (S.phaseIdx < 0 || S.phaseIdx > 2) { clearLive(); return; }
+  if (S.phaseIdx < 0 || S.phaseIdx > lastPhaseIdx()) { clearLive(); return; }
   try {
-    localStorage.setItem("andyLiveSession", JSON.stringify({
+    localStorage.setItem(keyLive(getActiveProjectId()), JSON.stringify({
       day: getDay(),
       duration: S.duration,
       totalSecs: S.totalSecs,
@@ -507,10 +646,10 @@ function persistLive() {
     }));
   } catch(e) {}
 }
-function clearLive() { try { localStorage.removeItem("andyLiveSession"); } catch(e) {} }
+function clearLive() { try { localStorage.removeItem(keyLive(getActiveProjectId())); } catch(e) {} }
 function loadLive() {
   try {
-    const raw = localStorage.getItem("andyLiveSession");
+    const raw = localStorage.getItem(keyLive(getActiveProjectId()));
     return raw ? JSON.parse(raw) : null;
   } catch(e) { return null; }
 }
@@ -520,7 +659,7 @@ function offerResume() {
   if (!live) return;
   // Account for time that passed while the app was closed/backgrounded
   const idleSecs = Math.floor((Date.now() - live.savedAt) / 1000);
-  const projectedElapsed = Math.min(live.elapsed + idleSecs, HARDCAP);
+  const projectedElapsed = Math.min(live.elapsed + idleSecs, currentHardcap());
 
   const banner = $("resumeBanner");
   $("resumeText").textContent = "You have an unfinished Day " + live.day + " session (" +
@@ -534,7 +673,7 @@ function offerResume() {
     S.phaseIdx = live.phaseIdx;
     // Re-derive phase elapsed proportionally if we fast-forwarded past a phase boundary,
     // simplest safe approach: keep phase elapsed but cap it at phase length.
-    S.phaseElapsed = Math.min(live.phaseElapsed + idleSecs, PHASES[Math.min(live.phaseIdx,2)].mins*60);
+    S.phaseElapsed = Math.min(live.phaseElapsed + idleSecs, currentPhases()[Math.min(live.phaseIdx,lastPhaseIdx())].mins*60);
     S.running = true;
     S.wallStart = Date.now(); S.wallElapsed = S.elapsed; S.wallPhase = S.phaseElapsed;
     S.warned5 = S.elapsed >= S.totalSecs - 300;
@@ -586,8 +725,8 @@ function updateGoal() {
 // ═══════════════════════════════════════════════════
 function updateButtons() {
   const idle = S.phaseIdx === -1;
-  const active = S.phaseIdx >= 0 && S.phaseIdx <= 2;
-  const done = S.phaseIdx === 3;
+  const active = S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx();
+  const done = isDonePhase(S.phaseIdx);
 
   // Start button
   const startBtn = $("btnStart");
@@ -608,7 +747,7 @@ function updateButtons() {
   // Next button
   const nextBtn = $("btnNext");
   if (active) {
-    nextBtn.textContent = S.phaseIdx < 2 ? "Next phase →" : "✓\u2002Finish";
+    nextBtn.textContent = S.phaseIdx < lastPhaseIdx() ? "Next phase →" : "✓\u2002Finish";
     nextBtn.className = "btn teal";
     nextBtn.disabled = false;
   } else {
@@ -628,7 +767,7 @@ function refreshClock() {
   const elapsed = S.elapsed;
   const total = S.totalSecs;
   const phase = S.phaseIdx;
-  const cp = (phase >= 0 && phase <= 2) ? PHASES[phase] : null;
+  const cp = (phase >= 0 && phase <= lastPhaseIdx()) ? currentPhases()[phase] : null;
   const pSecs = cp ? cp.mins * 60 : 0;
 
   // Time display
@@ -667,12 +806,13 @@ function refreshClock() {
   const wb = $("warnBox");
   if (elapsed > total && phase !== 3) {
     wb.style.display = "block";
-    wb.textContent = elapsed >= HARDCAP ? "Session stopped at 90-minute hard cap." : "⚠  Over target. Maximum allowed: 90 minutes.";
+    const hcMins = Math.round(currentHardcap()/60);
+    wb.textContent = elapsed >= currentHardcap() ? ("Session stopped at " + hcMins + "-minute hard cap.") : ("⚠  Over target. Maximum allowed: " + hcMins + " minutes.");
   } else wb.style.display = "none";
 
   // Motivation
   const mb = $("motivBox");
-  if (cp && phase >= 0 && phase <= 2) { mb.style.display = "block"; mb.textContent = cp.motiv; }
+  if (cp && phase >= 0 && phase <= lastPhaseIdx()) { mb.style.display = "block"; mb.textContent = cp.motiv; }
   else mb.style.display = "none";
 
   updateButtons();
@@ -705,8 +845,8 @@ function tick() {
   }
 
   // Hard cap
-  if (S.elapsed >= HARDCAP) {
-    S.elapsed = HARDCAP;
+  if (S.elapsed >= currentHardcap()) {
+    S.elapsed = currentHardcap();
     S.running = false;
     stopOvertime();
     finishSession();
@@ -715,11 +855,11 @@ function tick() {
   }
 
   // Phase auto-advance
-  const cp = S.phaseIdx >= 0 && S.phaseIdx <= 2 ? PHASES[S.phaseIdx] : null;
+  const cp = S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx() ? currentPhases()[S.phaseIdx] : null;
   if (cp && S.phaseElapsed >= cp.mins * 60) {
-    if (S.phaseIdx < 2) {
+    if (S.phaseIdx < lastPhaseIdx()) {
       playTransition();
-      notify("Phase complete", PHASES[S.phaseIdx].label + " done — moving to " + PHASES[S.phaseIdx+1].label + ".");
+      notify("Phase complete", currentPhases()[S.phaseIdx].label + " done — moving to " + currentPhases()[S.phaseIdx+1].label + ".");
       S.phaseIdx++;
       S.phaseElapsed = 0;
       S.wallPhase = 0;
@@ -773,7 +913,7 @@ function startSession() {
 }
 
 function pauseResume() {
-  if (S.phaseIdx < 0 || S.phaseIdx > 2) return;
+  if (S.phaseIdx < 0 || S.phaseIdx > lastPhaseIdx()) return;
   if (S.running) {
     S.running = false;
     clearInterval(S.rafId);
@@ -789,8 +929,8 @@ function pauseResume() {
 }
 
 function nextPhase() {
-  if (S.phaseIdx < 0 || S.phaseIdx > 2) return;
-  if (S.phaseIdx < 2) {
+  if (S.phaseIdx < 0 || S.phaseIdx > lastPhaseIdx()) return;
+  if (S.phaseIdx < lastPhaseIdx()) {
     playTransition();
     S.phaseIdx++;
     S.phaseElapsed = 0;
@@ -805,7 +945,7 @@ function nextPhase() {
 }
 
 function endEarly() {
-  if (S.phaseIdx < 0 || S.phaseIdx > 2) return;
+  if (S.phaseIdx < 0 || S.phaseIdx > lastPhaseIdx()) return;
   S.running = false;
   clearInterval(S.rafId);
   stopOvertime();
@@ -835,7 +975,7 @@ function nextDay() {
 }
 
 function finishSession() {
-  S.phaseIdx = 3;
+  S.phaseIdx = doneIdx();
   const mins = Math.round(S.elapsed / 60);
   const note = $("noteIn").value.trim();
   const goalDone = $("goalChk").checked;
@@ -953,6 +1093,69 @@ function renderHistory() {
 }
 
 // ═══════════════════════════════════════════════════
+// PROJECT UI
+// ═══════════════════════════════════════════════════
+function renderProjectHeader() {
+  const p = activeProject();
+  $("appTitle").textContent = p.title || ("⏱ " + p.name);
+  $("appSubtitle").textContent = (p.subtitle || p.name) + " \u00a0·\u00a0 Flexible focus sessions";
+  document.title = p.name + " — Study Timer";
+  $("dayIn").max = p.maxDay || 9999;
+  $("btnDelProject").style.display = p.builtin ? "none" : "inline-block";
+
+  // Legend + footer reflect the active project's phase template
+  const phases = currentPhases();
+  const legend = $("legendBox");
+  legend.style.gridTemplateColumns = phases.map(() => "1fr").join(" ");
+  legend.innerHTML = phases.map(ph =>
+    '<div class="legitem"><div class="ll">' + ph.label.toUpperCase() + '</div><div class="ld">' + ph.mins + ' min</div></div>'
+  ).join('');
+  const hcMins = Math.round(currentHardcap()/60);
+  $("footerText").textContent = "Flexible duration \u00a0·\u00a0 " + hcMins + " min hard cap \u00a0·\u00a0 Consistency beats intensity";
+}
+function renderProjectSelect() {
+  const sel = $("projectSelect");
+  const pid = getActiveProjectId();
+  sel.innerHTML = allProjects().map(p =>
+    '<option value="' + p.id + '"' + (p.id === pid ? ' selected' : '') + '>' + p.name + '</option>'
+  ).join('');
+}
+function openProjectModal() {
+  $("npName").value = "";
+  $("npGoals").value = "";
+  $("npTemplate").innerHTML = Object.keys(PHASE_TEMPLATES).map(key =>
+    '<option value="' + key + '"' + (key === "standard" ? ' selected' : '') + '>' + PHASE_TEMPLATES[key].label + '</option>'
+  ).join('');
+  $("projectModal").classList.add("show");
+  $("npName").focus();
+}
+function closeProjectModal() { $("projectModal").classList.remove("show"); }
+
+// Refresh the whole UI after switching to a different (or newly created) project
+function switchProject() {
+  resetTimer();
+  loadProjectData();
+  renderProjectSelect();
+  renderProjectHeader();
+  const last = getLastDay();
+  let suggested = last;
+  if (S.sessions.length) {
+    const maxDay = Math.max(...S.sessions.map(s => s.day));
+    suggested = Math.min(activeProject().maxDay || 9999, maxDay + 1);
+  }
+  $("dayIn").value = Math.max(1, Math.min(activeProject().maxDay || 9999, suggested));
+  updateGoal();
+  updateProgLabels();
+  refreshClock();
+  renderStats();
+  renderLog();
+  renderHistory();
+  $("streakAlert").style.display = "none";
+  checkStreakAlert();
+  offerResume();
+}
+
+// ═══════════════════════════════════════════════════
 // STREAK ALERT
 // ═══════════════════════════════════════════════════
 function checkStreakAlert() {
@@ -970,8 +1173,10 @@ function checkStreakAlert() {
 // BACKUP / EXPORT / IMPORT
 // ═══════════════════════════════════════════════════
 function exportBackup() {
+  const p = activeProject();
   const payload = {
     exportedAt: new Date().toISOString(),
+    project: {id: p.id, name: p.name},
     sessions: S.sessions,
     goalChecks: S.goalChecks,
     lastDay: getLastDay(),
@@ -980,7 +1185,7 @@ function exportBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   const stamp = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = "study-timer-backup-" + stamp + ".json";
+  a.href = url; a.download = "study-timer-" + p.id + "-backup-" + stamp + ".json";
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
@@ -1017,6 +1222,70 @@ function importBackup(file) {
 // ═══════════════════════════════════════════════════
 // EVENT WIRING — done once, never repeated
 // ═══════════════════════════════════════════════════
+// Project switching
+$("projectSelect").addEventListener("change", () => {
+  if (S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx()) {
+    alert("Finish or reset the current session before switching projects.");
+    renderProjectSelect();
+    return;
+  }
+  setActiveProjectId($("projectSelect").value);
+  switchProject();
+});
+
+$("btnNewProject").addEventListener("click", () => {
+  if (S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx()) { alert("Finish or reset the current session before creating a new project."); return; }
+  openProjectModal();
+});
+$("npCancel").addEventListener("click", () => closeProjectModal());
+$("projectModal").addEventListener("click", (e) => { if (e.target.id === "projectModal") closeProjectModal(); });
+$("npSave").addEventListener("click", () => {
+  const name = $("npName").value.trim();
+  if (!name) { alert("Give the project a name."); return; }
+  const goalsRaw = $("npGoals").value.trim();
+  const goals = {};
+  let maxDay = 0;
+  if (goalsRaw) {
+    goalsRaw.split("\n").forEach(line => {
+      const m = line.match(/^\s*(\d+)\s*[:\-]\s*(.+)$/);
+      if (m) { goals[+m[1]] = m[2].trim(); maxDay = Math.max(maxDay, +m[1]); }
+    });
+  }
+  const proj = {
+    id: "custom_" + Date.now(),
+    builtin: false,
+    name: name,
+    title: "⏱ " + name,
+    subtitle: name,
+    maxDay: maxDay || 365,
+    goals: goals,
+    phaseTemplate: PHASE_TEMPLATES[$("npTemplate").value] ? $("npTemplate").value : "standard",
+  };
+  const list = loadCustomProjects();
+  list.push(proj);
+  saveCustomProjects(list);
+  setActiveProjectId(proj.id);
+  closeProjectModal();
+  switchProject();
+});
+
+$("btnDelProject").addEventListener("click", () => {
+  if (S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx()) { alert("Finish or reset the current session before deleting a project."); return; }
+  const p = activeProject();
+  if (p.builtin) return;
+  if (!confirm('Delete project "' + p.name + '"? Its session history will also be removed. This cannot be undone.')) return;
+  const list = loadCustomProjects().filter(x => x.id !== p.id);
+  saveCustomProjects(list);
+  try {
+    localStorage.removeItem(keySessions(p.id));
+    localStorage.removeItem(keyGoalChecks(p.id));
+    localStorage.removeItem(keyLastDay(p.id));
+    localStorage.removeItem(keyLive(p.id));
+  } catch(e) {}
+  setActiveProjectId(BUILTIN_PROJECT.id);
+  switchProject();
+});
+
 // Preset buttons
 document.querySelectorAll(".pre").forEach(b => {
   b.addEventListener("click", () => setDuration(+b.dataset.min));
@@ -1050,7 +1319,7 @@ $("goalChk").addEventListener("change", () => {
 // Start / Pause / Resume / Next day
 $("btnStart").addEventListener("click", () => {
   if (S.phaseIdx === -1) startSession();
-  else if (S.phaseIdx === 3) nextDay();
+  else if (isDonePhase(S.phaseIdx)) nextDay();
   else pauseResume();
 });
 
@@ -1062,7 +1331,7 @@ $("btnEnd").addEventListener("click", () => endEarly());
 
 // Reset
 $("btnReset").addEventListener("click", () => {
-  if (S.phaseIdx >= 0 && S.phaseIdx <= 2) {
+  if (S.phaseIdx >= 0 && S.phaseIdx <= lastPhaseIdx()) {
     if (!confirm("Reset will discard the current in-progress session. Continue?")) return;
   }
   resetTimer();
@@ -1114,6 +1383,11 @@ window.addEventListener("appinstalled", () => $("installBanner").style.display =
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+migrateLegacyData();
+loadProjectData();
+renderProjectSelect();
+renderProjectHeader();
+
 // Default the day field to (last logged day + 1) if the user hasn't
 // manually changed it yet this load, so Andy isn't stuck re-typing his
 // day number every single time he opens the app.
@@ -1122,9 +1396,9 @@ window.addEventListener("appinstalled", () => $("installBanner").style.display =
   let suggested = last;
   if (S.sessions.length) {
     const maxDay = Math.max(...S.sessions.map(s => s.day));
-    suggested = Math.min(90, maxDay + 1);
+    suggested = Math.min(activeProject().maxDay || 9999, maxDay + 1);
   }
-  $("dayIn").value = Math.max(1, Math.min(90, suggested));
+  $("dayIn").value = Math.max(1, Math.min(activeProject().maxDay || 9999, suggested));
 })();
 
 updateProgLabels();
