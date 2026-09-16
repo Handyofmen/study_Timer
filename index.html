@@ -414,6 +414,18 @@ const PHASE_TEMPLATES = {
        motiv:"One block, one task. Go deep — no switching gears."},
     ],
   },
+  compact: {
+    label: "Compact Input / Build / Document (10/20/10)",
+    hardcapSecs: 3600, // 60 min absolute max
+    phases: [
+      {label:"Input",    mins:10, color:"#2563EB", inner:"#DBEAFE",
+       motiv:"Quick absorb — just enough to move into building."},
+      {label:"Build",    mins:20, color:"#0D9488", inner:"#CCFBF1",
+       motiv:"Build it, don't just read it. Hands on keyboard beats eyes on screen."},
+      {label:"Document", mins:10, color:"#EA580C", inner:"#FFF7ED",
+       motiv:"Document now while it's fresh — this is your portfolio evidence."},
+    ],
+  },
 };
 function currentPhases()  { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).phases; }
 function currentHardcap() { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).hardcapSecs; }
@@ -434,7 +446,6 @@ const PHASE_RANGES = [
   {start:66, end:75, tool:"HubSpot deep-practice & review"},
   {start:76, end:80, tool:"Zapier"},
   {start:81, end:88, tool:"Zapier deep-practice & Integration Map"},
-  {start:89, end:90, tool:"Final portfolio wrap-up"},
 ];
 function toolForDayBuiltin(d) {
   const r = PHASE_RANGES.find(r => d >= r.start && d <= r.end);
@@ -476,8 +487,6 @@ const GOALS = {
   78:"Zapier: design the 3-step Pro workflow on paper",
   79:"Zapier: test Zap runs, screenshot successful history",
   80:"Zapier: build Integration Map in Control Center document",
-  89:"Final: write your 150-word 'What I Built in 90 Days' summary",
-  90:"Final: upload all certification badges to LinkedIn — you're done!",
 };
 
 const BUILTIN_PROJECT = {
@@ -486,9 +495,9 @@ const BUILTIN_PROJECT = {
   name: "90-Day Enterprise Tech Mastery",
   title: "⏱ 90-Day Study Timer",
   subtitle: "Andy's Enterprise Tech Mastery",
-  maxDay: 90,
+  maxDay: 88,
   goals: GOALS,
-  phaseTemplate: "standard",
+  phaseTemplate: "compact",
 };
 
 function goalForDay(d) {
@@ -519,6 +528,227 @@ function keySessions(pid)   { return "sessions_" + pid; }
 function keyGoalChecks(pid) { return "goalChecks_" + pid; }
 function keyLastDay(pid)    { return "lastDay_" + pid; }
 function keyLive(pid)       { return "liveSession_" + pid; }
+
+// ═══════════════════════════════════════════════════
+// SEED PROJECTS — the full curriculum + life-tracking roster,
+// installed once on first load. Freely renamable/deletable afterward;
+// deleting one does not bring it back.
+// ═══════════════════════════════════════════════════
+const SEED_PROJECTS = [
+  {
+    id: "sql-foundations",
+    builtin: false,
+    name: "SQL Foundations",
+    title: "⏱ SQL Foundations",
+    subtitle: "Parallel track — SQLBolt",
+    maxDay: 6,
+    phaseTemplate: "pomodoro",
+    goals: {
+      1: "SELECT / FROM / WHERE — SQLBolt lessons 1–4",
+      2: "Sorting & filtering — SQLBolt lessons 5–6 (ORDER BY, LIMIT, comparison operators)",
+      3: "Aggregation — SQLBolt lessons 7–9 (COUNT, SUM, AVG, GROUP BY)",
+      4: "JOINs — SQLBolt lessons 10–13 (INNER JOIN, LEFT JOIN)",
+      5: "Subqueries + review — SQLBolt lessons 14–18",
+      6: "Applied practice: write 3 queries against a sample CRM-style dataset (mirror Horizon Digital Agency structure); save queries + results as a portfolio note",
+    },
+  },
+  {
+    id: "salesforce-trailhead",
+    builtin: false,
+    name: "Salesforce Trailhead",
+    title: "⏱ Salesforce Trailhead",
+    subtitle: "Sales Cloud track → Admin certification",
+    maxDay: 27,
+    phaseTemplate: "standard",
+    goals: {
+      1: "Trailhead orientation + \"Salesforce User Basics\" trail",
+      2: "\"Data Modeling\" trail — objects, fields, relationships",
+      3: "\"Security Basics\" — profiles, permission sets, sharing rules",
+      4: "\"Automate Business Processes\" — Flow basics",
+      5: "\"Reports & Dashboards\" trail",
+      6: "Sales Cloud — Lead Management module",
+      7: "Sales Cloud — Opportunity Management module",
+      8: "Sales Cloud — Forecasting & Pipeline",
+      9: "Applied: set up a free Developer Edition org for Horizon Digital Agency, load sample data",
+      10: "Build one automation (Flow) inside that sandbox org",
+      11: "Build one report + dashboard inside that sandbox org",
+      12: "Review, knowledge check, badge count review — retake any module under 8/10",
+      13: "Admin Beginner (Day 1 of 4) — navigation, org setup, user management basics + Playground sandbox practice",
+      14: "Admin Beginner (Day 2 of 4) — navigation, org setup, user management basics + Playground sandbox practice",
+      15: "Admin Beginner (Day 3 of 4) — navigation, org setup, user management basics + Playground sandbox practice",
+      16: "Admin Beginner (Day 4 of 4) — navigation, org setup, user management basics + Playground sandbox practice",
+      17: "Admin Intermediate (Day 1 of 4) — data modeling, security/sharing rules, intro to Flow Builder",
+      18: "Admin Intermediate (Day 2 of 4) — data modeling, security/sharing rules, intro to Flow Builder",
+      19: "Admin Intermediate (Day 3 of 4) — data modeling, security/sharing rules, intro to Flow Builder",
+      20: "Admin Intermediate (Day 4 of 4) — data modeling, security/sharing rules, intro to Flow Builder",
+      21: "Admin Advanced (Day 1 of 4) — advanced Flow Builder, reports & dashboards, process automation",
+      22: "Admin Advanced (Day 2 of 4) — advanced Flow Builder, reports & dashboards, process automation",
+      23: "Admin Advanced (Day 3 of 4) — advanced Flow Builder, reports & dashboards, process automation",
+      24: "Admin Advanced (Day 4 of 4) — advanced Flow Builder, reports & dashboards, process automation",
+      25: "Superbadge (Day 1 of 3) — Business Administration Specialist Superbadge, proctored & scenario-based",
+      26: "Superbadge (Day 2 of 3) — Business Administration Specialist Superbadge, proctored & scenario-based",
+      27: "Superbadge (Day 3 of 3) — final review, retake any weak module",
+    },
+  },
+  {
+    id: "dashboarding",
+    builtin: false,
+    name: "Dashboarding",
+    title: "⏱ Dashboarding",
+    subtitle: "Parallel track — Sheets/Excel",
+    maxDay: 4,
+    phaseTemplate: "pomodoro",
+    goals: {
+      1: "Pivot tables on CRM export data",
+      2: "XLOOKUP + advanced formulas",
+      3: "Building a KPI dashboard — charts, conditional formatting",
+      4: "Applied: build one full \"Ops Dashboard\" from Horizon Digital Agency data, save as a portfolio artifact",
+    },
+  },
+  {
+    id: "portfolio-wrapup",
+    builtin: false,
+    name: "Portfolio Wrap-Up",
+    title: "⏱ Portfolio Wrap-Up",
+    subtitle: "Final consolidation — after Salesforce",
+    maxDay: 5,
+    phaseTemplate: "standard",
+    goals: {
+      1: "Write up the 3 AI automations (from Zapier phase) as case studies",
+      2: "Write up the CRM dashboard as a case study",
+      3: "Write the full extended-program run-off/summary document",
+      4: "Record 1–2 WorkflowLab HQ videos covering the highlights",
+      5: "Publish everything to your portfolio site, final review",
+    },
+  },
+  {
+    id: "smm-brand",
+    builtin: false,
+    name: "Social Media Manager & Brand",
+    title: "⏱ SMM & Brand",
+    subtitle: "12-day curriculum → ongoing freelance brand work",
+    maxDay: 365,
+    phaseTemplate: "standard",
+    goals: {
+      1: "Foundations — social strategy basics, platform landscape (start HubSpot Academy Social Media Certification)",
+      2: "Content strategy — content pillars, calendars, scheduling tools (free tiers of Buffer/Later)",
+      3: "Platform deep-dive: Instagram/Facebook (Meta Blueprint free courses)",
+      4: "Platform deep-dive: LinkedIn organic strategy — most relevant for B2B/remote-client visibility",
+      5: "Platform deep-dive: TikTok/short-form video trends",
+      6: "Copywriting for social — hooks, captions, CTAs",
+      7: "Visual content — hands-on Canva session, design a week's worth of templated posts",
+      8: "Analytics & reporting — native platform insights, core KPIs (engagement rate, reach, CTR); ties into Dashboarding skill",
+      9: "Paid social basics — boosted posts, Ads Manager fundamentals (Meta Blueprint free ads courses)",
+      10: "Client management — proposals, content calendar templates, pricing/packaging a \"Social Media Management\" freelance offer",
+      11: "Applied: build a full sample month's content calendar + 5 designed posts for a mock client, using Canva",
+      12: "Finalize HubSpot Social Media cert, compile sample calendar/posts as a portfolio case study, publish",
+    },
+  },
+  {
+    id: "youtube-workflowlab",
+    builtin: false,
+    name: "YouTube — WorkflowLab HQ",
+    title: "⏱ WorkflowLab HQ",
+    subtitle: "Faceless AI tools & automation content",
+    maxDay: 365,
+    phaseTemplate: "standard",
+    goals: {},
+  },
+  {
+    id: "handyofmen-ops",
+    builtin: false,
+    name: "Handyofmen",
+    title: "⏱ Handyofmen",
+    subtitle: "Second-hand office electronics side hustle",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "website-landing",
+    builtin: false,
+    name: "Website / Landing Page",
+    title: "⏱ Website Build",
+    subtitle: "Personal site & landing page work",
+    maxDay: 365,
+    phaseTemplate: "standard",
+    goals: {},
+  },
+  {
+    id: "creative-imaging",
+    builtin: false,
+    name: "Image Prompting & Creativity",
+    title: "⏱ Creative Practice",
+    subtitle: "Image prompting & creative exploration",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "affiliate-gigm",
+    builtin: false,
+    name: "Affiliate Marketing / GIGM",
+    title: "⏱ Affiliate & GIGM",
+    subtitle: "Phone/laptop accessories affiliate venture",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "interview-prep",
+    builtin: false,
+    name: "Interview Prep",
+    title: "⏱ Interview Prep",
+    subtitle: "General interview practice — 2x/week",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "skill-development",
+    builtin: false,
+    name: "Skill Development",
+    title: "⏱ Skill Development",
+    subtitle: "General skill-building — 2x/week",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "job-applications",
+    builtin: false,
+    name: "Job Applications",
+    title: "⏱ Job Applications",
+    subtitle: "Mon/Wed application block",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+  {
+    id: "expat-job",
+    builtin: false,
+    name: "Expat Job",
+    title: "⏱ Expat Job",
+    subtitle: "Tue/Thu work block",
+    maxDay: 365,
+    phaseTemplate: "single",
+    goals: {},
+  },
+];
+
+// Installs the seed roster once. Runs only if it's never run before;
+// projects the user later deletes are never re-added.
+function installSeedProjects() {
+  if (localStorage.getItem("seedInstalled_v1")) return;
+  try {
+    const existing = loadCustomProjects();
+    const existingIds = new Set(existing.map(p => p.id));
+    const toAdd = SEED_PROJECTS.filter(p => !existingIds.has(p.id));
+    if (toAdd.length) saveCustomProjects(existing.concat(toAdd));
+  } catch(e) {}
+  try { localStorage.setItem("seedInstalled_v1", "1"); } catch(e) {}
+}
+
 
 // One-time migration: fold pre-existing (pre-multi-project) data into the
 // built-in 90-Day project so no history is lost.
@@ -1384,6 +1614,7 @@ window.addEventListener("appinstalled", () => $("installBanner").style.display =
 // INIT
 // ═══════════════════════════════════════════════════
 migrateLegacyData();
+installSeedProjects();
 loadProjectData();
 renderProjectSelect();
 renderProjectHeader();
