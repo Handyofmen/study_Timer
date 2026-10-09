@@ -252,7 +252,7 @@ html,body{min-height:100vh;background:linear-gradient(135deg,#1B3A6B 0%,#0D9488 
     <!-- Day + Goal -->
     <div class="dayrow">
       <div class="daybox">
-        <label for="dayIn">Day</label>
+        <label for="dayIn" id="dayLabel">Day</label>
         <input type="number" id="dayIn" min="1" max="90" value="1"/>
       </div>
       <div class="goalbox">
@@ -414,6 +414,50 @@ const PHASE_TEMPLATES = {
        motiv:"One block, one task. Go deep — no switching gears."},
     ],
   },
+  // ── EA Program session shapes (3-hour sessions); hidden from the New Project dropdown ──
+  ea3: {
+    label: "EA session (Learn 30 / Practice 75 / Break 10 / Build 45 / Review 20)",
+    hidden: true,
+    hardcapSecs: 14400, // 4 h absolute max
+    phases: [
+      {label:"Learn",    mins:30, color:"#2563EB", inner:"#DBEAFE",
+       motiv:"One source only. Take 5 lines of notes, then stop reading and go practise."},
+      {label:"Practice", mins:75, color:"#0D9488", inner:"#CCFBF1",
+       motiv:"Do the task in the real tool, on the clock. Treat Daniela as a real executive."},
+      {label:"Break",    mins:10, color:"#16A34A", inner:"#DCFCE7",
+       motiv:"Away from the screen. Water, stretch."},
+      {label:"Build",    mins:45, color:"#EA580C", inner:"#FFF7ED",
+       motiv:"Turn today's practice into a portfolio-quality version."},
+      {label:"Review",   mins:20, color:"#1B3A6B", inner:"#DBEAFE",
+       motiv:"Score yourself 0-10, list 2 mistakes, fix 1. Type the score in the reflection box."},
+    ],
+  },
+  ea3test: {
+    label: "EA weekly test (Test 120 / Break 10 / Review 50)",
+    hidden: true,
+    hardcapSecs: 14400,
+    phases: [
+      {label:"Test",   mins:120, color:"#DC2626", inner:"#FEE2E2",
+       motiv:"Test conditions: clock running, no notes, no re-reads. Pass mark is 7/10."},
+      {label:"Break",  mins:10,  color:"#16A34A", inner:"#DCFCE7",
+       motiv:"Step away before you score yourself."},
+      {label:"Review", mins:50,  color:"#1B3A6B", inner:"#DBEAFE",
+       motiv:"Score with the 0-10 rubric, redo the weakest task, then type your score in the reflection box."},
+    ],
+  },
+  ea3sim: {
+    label: "EA simulation (Simulate 120 / Break 10 / Review 50)",
+    hidden: true,
+    hardcapSecs: 14400,
+    phases: [
+      {label:"Simulate", mins:120, color:"#7C3AED", inner:"#EDE9FE",
+       motiv:"Run it like a real day for Daniela, with the clock running. If a scenario will not fit, skip it and note why."},
+      {label:"Break",    mins:10,  color:"#16A34A", inner:"#DCFCE7",
+       motiv:"Step away from the screen."},
+      {label:"Review",   mins:50,  color:"#1B3A6B", inner:"#DBEAFE",
+       motiv:"Write a 3-line reflection per scenario, update your Scores tab, then type your score in the reflection box."},
+    ],
+  },
   compact: {
     label: "Compact Input / Build / Document (10/20/10)",
     hardcapSecs: 3600, // 60 min absolute max
@@ -427,8 +471,19 @@ const PHASE_TEMPLATES = {
     ],
   },
 };
-function currentPhases()  { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).phases; }
-function currentHardcap() { return (PHASE_TEMPLATES[activeProject().phaseTemplate] || PHASE_TEMPLATES.standard).hardcapSecs; }
+// A project can give individual days their own session shape (project.dayTemplates).
+// While a session is running or finished, the shape is locked in S.tplKey so editing
+// the day box can never change the phases of a session that has already started.
+function projectTplKey(p, day) {
+  return (p.dayTemplates && p.dayTemplates[day]) || p.phaseTemplate || "standard";
+}
+function activeTplKey() {
+  if (S.tplKey) return S.tplKey;
+  return projectTplKey(activeProject(), getDay());
+}
+function tplFor(key)      { return PHASE_TEMPLATES[key] || PHASE_TEMPLATES.standard; }
+function currentPhases()  { return tplFor(activeTplKey()).phases; }
+function currentHardcap() { return tplFor(activeTplKey()).hardcapSecs; }
 function lastPhaseIdx()   { return currentPhases().length - 1; }
 function doneIdx()        { return currentPhases().length; }
 function isDonePhase(i)   { return i === doneIdx(); }
@@ -790,6 +845,7 @@ const S = {
   sessions: [],
   goalChecks: {},
   rafId: null,
+  tplKey: null,       // session shape locked at Start (null while idle)
 };
 
 function loadProjectData() {
@@ -870,6 +926,7 @@ function persistLive() {
       elapsed: S.elapsed,
       phaseIdx: S.phaseIdx,
       phaseElapsed: S.phaseElapsed,
+      tplKey: S.tplKey,
       note: $("noteIn") ? $("noteIn").value : "",
       goalDone: $("goalChk") ? $("goalChk").checked : false,
       savedAt: Date.now(),
@@ -889,7 +946,8 @@ function offerResume() {
   if (!live) return;
   // Account for time that passed while the app was closed/backgrounded
   const idleSecs = Math.floor((Date.now() - live.savedAt) / 1000);
-  const projectedElapsed = Math.min(live.elapsed + idleSecs, currentHardcap());
+  const liveTpl = live.tplKey || projectTplKey(activeProject(), live.day);
+  const projectedElapsed = Math.min(live.elapsed + idleSecs, tplFor(liveTpl).hardcapSecs);
 
   const banner = $("resumeBanner");
   $("resumeText").textContent = "You have an unfinished Day " + live.day + " session (" +
@@ -900,6 +958,7 @@ function offerResume() {
     $("dayIn").value = live.day;
     S.duration = live.duration; S.totalSecs = live.totalSecs;
     S.elapsed = projectedElapsed;
+    S.tplKey = liveTpl;
     S.phaseIdx = live.phaseIdx;
     // Re-derive phase elapsed proportionally if we fast-forwarded past a phase boundary,
     // simplest safe approach: keep phase elapsed but cap it at phase length.
@@ -1006,11 +1065,11 @@ function refreshClock() {
 
   // Sub label
   if (phase === -1) $("clockSub").textContent = "READY";
-  else if (phase === 3) $("clockSub").textContent = "DONE ✓";
+  else if (isDonePhase(phase)) $("clockSub").textContent = "DONE ✓";
   else if (cp) $("clockSub").textContent = cp.label.toUpperCase() + " · " + fmt(Math.max(0, pSecs - S.phaseElapsed)) + " left";
 
   // Over target
-  $("clockOver").textContent = (elapsed > total && phase !== 3) ? "+" + fmt(elapsed - total) + " over target" : "";
+  $("clockOver").textContent = (elapsed > total && !isDonePhase(phase)) ? "+" + fmt(elapsed - total) + " over target" : "";
 
   // Outer ring — overall
   const op = Math.min(elapsed / total, 1);
@@ -1034,7 +1093,7 @@ function refreshClock() {
 
   // Warn box
   const wb = $("warnBox");
-  if (elapsed > total && phase !== 3) {
+  if (elapsed > total && !isDonePhase(phase)) {
     wb.style.display = "block";
     const hcMins = Math.round(currentHardcap()/60);
     wb.textContent = elapsed >= currentHardcap() ? ("Session stopped at " + hcMins + "-minute hard cap.") : ("⚠  Over target. Maximum allowed: " + hcMins + " minutes.");
@@ -1070,7 +1129,7 @@ function tick() {
   if (!S.playedEnd && S.elapsed >= S.totalSecs) {
     S.playedEnd = true;
     playChime();
-    notify("Session target reached", "Day " + getDay() + " — finish the Document phase when ready.");
+    notify("Session target reached", "Day " + getDay() + " — finish your last phase when ready.");
     S.overtimeInt = setInterval(() => { if (S.running && S.elapsed >= S.totalSecs) playOvertime(); }, 60000);
   }
 
@@ -1126,6 +1185,7 @@ window.addEventListener("pagehide", persistLive);
 // ═══════════════════════════════════════════════════
 function startSession() {
   clearInterval(S.rafId);
+  S.tplKey = projectTplKey(activeProject(), getDay());
   S.elapsed = 0; S.phaseElapsed = 0; S.phaseIdx = 0;
   S.running = true; S.warned5 = false; S.playedEnd = false;
   S.wallStart = Date.now(); S.wallElapsed = 0; S.wallPhase = 0;
@@ -1188,12 +1248,14 @@ function resetTimer() {
   clearInterval(S.rafId);
   stopOvertime();
   S.elapsed = 0; S.phaseElapsed = 0; S.phaseIdx = -1;
+  S.tplKey = null;
   S.warned5 = false; S.playedEnd = false;
   $("noteIn").value = "";
   $("noteArea").style.display = "none";
   $("doneBox").style.display = "none";
   $("warnBox").style.display = "none";
   clearLive();
+  renderLegend();
   refreshClock();
 }
 
@@ -1242,6 +1304,7 @@ function renderStats() {
   const streaks = calcStreaks();
   $("stStreak").textContent = streaks.current;
   $("stBest").textContent = streaks.best;
+  renderEAExtras();
 }
 function calcStreaks() {
   if (!S.sessions.length) return {current:0, best:0};
@@ -1333,7 +1396,11 @@ function renderProjectHeader() {
   $("dayIn").max = p.maxDay || 9999;
   $("btnDelProject").style.display = p.builtin ? "none" : "inline-block";
 
-  // Legend + footer reflect the active project's phase template
+  $("dayLabel").textContent = p.unitLabel || "Day";
+  renderLegend();
+}
+function renderLegend() {
+  // Legend + footer reflect the phase template of the selected day
   const phases = currentPhases();
   const legend = $("legendBox");
   legend.style.gridTemplateColumns = phases.map(() => "1fr").join(" ");
@@ -1353,7 +1420,7 @@ function renderProjectSelect() {
 function openProjectModal() {
   $("npName").value = "";
   $("npGoals").value = "";
-  $("npTemplate").innerHTML = Object.keys(PHASE_TEMPLATES).map(key =>
+  $("npTemplate").innerHTML = Object.keys(PHASE_TEMPLATES).filter(key => !PHASE_TEMPLATES[key].hidden).map(key =>
     '<option value="' + key + '"' + (key === "standard" ? ' selected' : '') + '>' + PHASE_TEMPLATES[key].label + '</option>'
   ).join('');
   $("projectModal").classList.add("show");
@@ -1374,6 +1441,8 @@ function switchProject() {
     suggested = Math.min(activeProject().maxDay || 9999, maxDay + 1);
   }
   $("dayIn").value = Math.max(1, Math.min(activeProject().maxDay || 9999, suggested));
+  renderLegend();
+  if (activeProject().defaultMins && S.phaseIdx === -1) setDuration(activeProject().defaultMins);
   updateGoal();
   updateProgLabels();
   refreshClock();
@@ -1611,10 +1680,63 @@ $("btnDismiss").addEventListener("click", () => $("installBanner").style.display
 window.addEventListener("appinstalled", () => $("installBanner").style.display = "none");
 
 // ═══════════════════════════════════════════════════
+// EA PROGRAM (3-hour sessions, 121 sessions, standalone)
+// ═══════════════════════════════════════════════════
+const EA_ID = "ea-3h", EA_SESSIONS = 121, EA_TARGET_H = 363;
+const EA_GOALS = {"1": "Wk 1 · Phase 1 · Foundation — Practice office setup (part 1 of 2): create the practice Google account and the folder system (YYYY-MM-DD_Topic_v1).", "2": "Wk 1 · Phase 1 · Foundation — Practice office setup (part 2 of 2): write the EXEC PROFILE doc for Daniela and build the master tracker.", "3": "Wk 1 · Phase 1 · Foundation — Security (part 1 of 2): set up a password manager and 2FA with backup codes.", "4": "Wk 1 · Phase 1 · Foundation — Security (part 2 of 2): write the one-page Confidentiality Rules and take the 10-item phishing quiz.", "5": "Wk 1 · Phase 1 · Foundation — Email writing (part 1 of 2): write 5 prompt emails and score each 0-10.", "6": "Wk 1 · Phase 1 · Foundation — Email writing (part 2 of 2): write 5 more in Daniela's style (150 words max, one ask) and score each 0-10.", "7": "Wk 1 · Phase 1 · Foundation — Time zones (part 1 of 2): solve 15 Lagos/Boston/London puzzles.", "8": "Wk 1 · Phase 1 · Foundation — Time zones (part 2 of 2): build the cheat sheet showing pre- and post-DST offsets.", "9": "Wk 1 · WEEKLY TEST — write 5 new emails in under 10 min each plus a Lagos/Boston/London sheet for 8 meetings (2 across DST dates). Pass mark 7/10. Type your score in the reflection box.", "10": "Wk 1 · SIMULATION (Section 13, compact 3-hour version) — organize 2 weeks of calendar (a meeting lands in her no-meeting window), triage 20 emails and flag the Lighthouse email as confidential.", "11": "Wk 2 · Phase 2 · Core EA — Calendar structure and rules (part 1 of 2): list Daniela's recurring meetings and rules.", "12": "Wk 2 · Phase 2 · Core EA — Calendar structure and rules (part 2 of 2): build her 2-week calendar from them.", "13": "Wk 2 · Phase 2 · Core EA — Scheduling rules and buffers (part 1 of 2): apply 10-min buffers and 15-min prep blocks.", "14": "Wk 2 · Phase 2 · Core EA — Scheduling rules and buffers (part 2 of 2): protect the Tue/Thu mornings and check the whole calendar against her rules.", "15": "Wk 2 · Phase 2 · Core EA — Conflicts (part 1 of 2): resolve conflicts 1-2 using her stated priorities.", "16": "Wk 2 · Phase 2 · Core EA — Conflicts (part 2 of 2): resolve conflicts 3-4 and write the decision log.", "17": "Wk 2 · Phase 2 · Core EA — Recurring and protected time (part 1 of 2): set up recurring series and exceptions.", "18": "Wk 2 · Phase 2 · Core EA — Recurring and protected time (part 2 of 2): add focus time without breaking any of her rules.", "19": "Wk 2 · WEEKLY TEST — resolve a week with 4 conflicts and 2 time-zone traps. Output: final calendar + decision log. Pass mark 7/10. Type your score in the reflection box.", "20": "Wk 2 · SIMULATION (Section 13, compact 3-hour version) — Monday leadership agenda from raw notes (conflicting priorities), then minutes from a 30-min recording with an unclear decision plus a clarification email.", "21": "Wk 3 · Phase 2 · Core EA — Inbox rules and labels (part 1 of 2): build the label set.", "22": "Wk 3 · Phase 2 · Core EA — Inbox rules and labels (part 2 of 2): build the filters and reply rules in Gmail.", "23": "Wk 3 · Phase 2 · Core EA — Triage (part 1 of 2): triage emails 1-30 against the answer key.", "24": "Wk 3 · Phase 2 · Core EA — Triage (part 2 of 2): triage emails 31-60 and log your priority labels.", "25": "Wk 3 · Phase 2 · Core EA — Drafting for the executive (part 1 of 2): write replies in her voice.", "26": "Wk 3 · Phase 2 · Core EA — Drafting for the executive (part 2 of 2): list what you may never answer for her (money, legal, personnel) and test yourself on 10 examples.", "27": "Wk 3 · Phase 2 · Core EA — Follow-up tracking (part 1 of 2): build the waiting-on list.", "28": "Wk 3 · Phase 2 · Core EA — Follow-up tracking (part 2 of 2): set up the 48-hour follow-up rule and run it on a sample week.", "29": "Wk 3 · WEEKLY TEST — triage 40 emails, draft 6 replies, flag 3 for escalation. Output: triage report. Pass mark 7/10. Type your score in the reflection box.", "30": "Wk 3 · SIMULATION (Section 13, compact 3-hour version) — 2-day Chicago itinerary (her preferred flight is sold out), then reconcile Week 1 loose ends into a status report.", "31": "Wk 4 · Phase 2 · Core EA — Agendas (part 1 of 2): study her rule (agenda required, 25/50-minute slots) and draft 2 agendas.", "32": "Wk 4 · Phase 2 · Core EA — Agendas (part 2 of 2): finish 3 more agendas and check each against the rule.", "33": "Wk 4 · Phase 2 · Core EA — Minutes (part 1 of 2): write minutes from the first half of a recorded public meeting.", "34": "Wk 4 · Phase 2 · Core EA — Minutes (part 2 of 2): finish the minutes, one page max.", "35": "Wk 4 · Phase 2 · Core EA — Action items (part 1 of 2): build the tracker with an owner and date for every action.", "36": "Wk 4 · Phase 2 · Core EA — Action items (part 2 of 2): run it on a second meeting and chase the open items.", "37": "Wk 4 · Phase 2 · Core EA — Follow-up emails (part 1 of 2): write send-ready follow-ups within a 2-hour limit.", "38": "Wk 4 · Phase 2 · Core EA — Follow-up emails (part 2 of 2): write 2 more under time pressure and score them.", "39": "Wk 4 · WEEKLY TEST — run a full meeting cycle from a transcript. Output: agenda, minutes, tracker, follow-up. Pass mark 7/10. Type your score in the reflection box.", "40": "Wk 4 · SIMULATION (Section 13, compact 3-hour version) — schedule a call across ET, London and Lagos around the 25 Oct / 1 Nov clock changes, then resolve a double booking of two important clients.", "41": "Wk 5 · Phase 3 · Digital Tools — Sheets formulas (part 1 of 2): practise SUM, IF and XLOOKUP on a sample sheet.", "42": "Wk 5 · Phase 3 · Digital Tools — Sheets formulas (part 2 of 2): apply clean formatting and fix a messy sheet.", "43": "Wk 5 · Phase 3 · Digital Tools — Sheets validation and dashboards (part 1 of 2): add data validation and conditional formatting.", "44": "Wk 5 · Phase 3 · Digital Tools — Sheets validation and dashboards (part 2 of 2): build a first simple dashboard.", "45": "Wk 5 · Phase 3 · Digital Tools — Expense tracking (part 1 of 2): build the workbook with categories.", "46": "Wk 5 · Phase 3 · Digital Tools — Expense tracking (part 2 of 2): add 3 currencies and enter 15 sample expenses.", "47": "Wk 5 · Phase 3 · Digital Tools — Vendor tracker (part 1 of 2): set up catering, cloud and legal vendors with renewal dates.", "48": "Wk 5 · Phase 3 · Digital Tools — Vendor tracker (part 2 of 2): write the comparison memo.", "49": "Wk 5 · WEEKLY TEST — build an expense report from 25 messy receipts. Output: clean sheet + summary. Pass mark 7/10. Type your score in the reflection box.", "50": "Wk 5 · SIMULATION (Section 13, compact 3-hour version) — last month's expense report (3 currencies, 1 missing receipt), then a 1-page Tidewater Logistics brief in 2 hours (call moved up 24h).", "51": "Wk 6 · Phase 3 · Digital Tools — Slides structure (part 1 of 2): learn structure and clean layout.", "52": "Wk 6 · Phase 3 · Digital Tools — Slides structure (part 2 of 2): build a 3-slide sample with one message per slide.", "53": "Wk 6 · Phase 3 · Digital Tools — Slides from notes (part 1 of 2): turn raw notes into a 10-slide outline.", "54": "Wk 6 · Phase 3 · Digital Tools — Slides from notes (part 2 of 2): build the deck and write the speaker notes.", "55": "Wk 6 · Phase 3 · Digital Tools — Scheduling links (part 1 of 2): set up Calendly (or equivalent) with working-hour rules.", "56": "Wk 6 · Phase 3 · Digital Tools — Scheduling links (part 2 of 2): add buffers for 25/50-minute meetings and test the link.", "57": "Wk 6 · Phase 3 · Digital Tools — CRM basics + Slack etiquette (part 1 of 2): enter 15 fictional HubSpot contacts with follow-up tasks.", "58": "Wk 6 · Phase 3 · Digital Tools — CRM basics + Slack etiquette (part 2 of 2): set up a mock Slack workspace and practise etiquette.", "59": "Wk 6 · WEEKLY TEST — build a 10-slide deck from raw notes in 3 hours. Output: deck + speaker notes (the roadmap allows 3 hours, so the test block is 120 min plus review). Pass mark 7/10. Type your score in the reflection box.", "60": "Wk 6 · SIMULATION (Section 13, compact 3-hour version) — triage 40 emails with an urgent client escalation, then decline a speaker invitation in her voice and ask her for the missing preference.", "61": "Wk 7 · Phase 4 · Executive Support — Travel planning, 3 cities (part 1 of 2): plan the first two cities with local and home times.", "62": "Wk 7 · Phase 4 · Executive Support — Travel planning, 3 cities (part 2 of 2): finish the third city with buffers and confirmation references.", "63": "Wk 7 · Phase 4 · Executive Support — Travel planning, international (part 1 of 2): plan the trip and check visa/passport expiry.", "64": "Wk 7 · Phase 4 · Executive Support — Travel planning, international (part 2 of 2): add ground transport and the final itinerary.", "65": "Wk 7 · Phase 4 · Executive Support — Contingencies (part 1 of 2): write plan B for a cancelled flight.", "66": "Wk 7 · Phase 4 · Executive Support — Contingencies (part 2 of 2): write plan B for a missed connection.", "67": "Wk 7 · Phase 4 · Executive Support — Expense capture while travelling (part 1 of 2): set up receipt and currency capture.", "68": "Wk 7 · Phase 4 · Executive Support — Expense capture while travelling (part 2 of 2): build the per-diem log.", "69": "Wk 7 · WEEKLY TEST — plan a 3-city trip with one cancelled flight. Output: itinerary + plan B. Pass mark 7/10. Type your score in the reflection box.", "70": "Wk 7 · SIMULATION (Section 13, compact 3-hour version) — a full Monday (executive runs 30 min late), then the RouteIQ launch tracker with the deadline moved forward 5 days.", "71": "Wk 8 · Phase 4 · Executive Support — Research method (part 1 of 2): answer 5 factual questions with sources.", "72": "Wk 8 · Phase 4 · Executive Support — Research method (part 2 of 2): keep the research log and review your sources.", "73": "Wk 8 · Phase 4 · Executive Support — Company profile (part 1 of 2): gather public sources for one company.", "74": "Wk 8 · Phase 4 · Executive Support — Company profile (part 2 of 2): write the profile from public sources only.", "75": "Wk 8 · Phase 4 · Executive Support — Executive brief format (part 1 of 2): study the one-page format and draft a brief.", "76": "Wk 8 · Phase 4 · Executive Support — Executive brief format (part 2 of 2): edit it so it ends in a decision or recommendation.", "77": "Wk 8 · Phase 4 · Executive Support — Managing up and pushback (part 1 of 2): write the diplomatic 'no, here is an alternative' email.", "78": "Wk 8 · Phase 4 · Executive Support — Managing up and pushback (part 2 of 2): start Section 19: draft your CV, LinkedIn headline and a 20-company target list.", "79": "Wk 8 · WEEKLY TEST — research a company and produce a 1-page brief in 2 hours. Output: brief. Pass mark 7/10. Type your score in the reflection box.", "80": "Wk 8 · SIMULATION (Section 13, compact 3-hour version) — 10-slide investor update with a missing revenue number (flag it), then board-dinner catering cancelled with 48 hours' notice.", "81": "Wk 9 · Phase 5 · AI for EAs — AI drafting and editing (part 1 of 2): give AI context and the desired action for 3 drafts.", "82": "Wk 9 · Phase 5 · AI for EAs — AI drafting and editing (part 2 of 2): edit them into Daniela's voice.", "83": "Wk 9 · Phase 5 · AI for EAs — AI summaries and verification (part 1 of 2): summarize a transcript with AI.", "84": "Wk 9 · Phase 5 · AI for EAs — AI summaries and verification (part 2 of 2): check every name, number and decision against the source.", "85": "Wk 9 · Phase 5 · AI for EAs — AI research (part 1 of 2): use AI for source leads on 3 questions.", "86": "Wk 9 · Phase 5 · AI for EAs — AI research (part 2 of 2): verify every claim yourself.", "87": "Wk 9 · Phase 5 · AI for EAs — Prompt library (part 1 of 2): build prompts 1-10, each with a 'do not use when' note.", "88": "Wk 9 · Phase 5 · AI for EAs — Prompt library (part 2 of 2): build prompts 11-20 and write Daniela's AI-use rules.", "89": "Wk 9 · WEEKLY TEST — seeded-error test: find all 5 planted errors in AI output. Output: corrected doc + error log. Pass mark 7/10. Type your score in the reflection box.", "90": "Wk 9 · SIMULATION (Section 13, compact 3-hour version) — handle a confidential email received by mistake (compensation data), then plan a 3-city international trip with a visa and passport check.", "91": "Wk 10 · Phase 5 · AI for EAs — Automation concepts (part 1 of 2): learn triggers, actions and task limits (Zapier free plan: 100 tasks/month, 2-step Zaps).", "92": "Wk 10 · Phase 5 · AI for EAs — Automation concepts (part 2 of 2): map 3 EA tasks that could be automated.", "93": "Wk 10 · Phase 5 · AI for EAs — Automation design (part 1 of 2): design a weekly report reminder on paper.", "94": "Wk 10 · Phase 5 · AI for EAs — Automation design (part 2 of 2): start building it.", "95": "Wk 10 · Phase 5 · AI for EAs — Build one workflow (part 1 of 2): build the workflow with fake data.", "96": "Wk 10 · Phase 5 · AI for EAs — Build one workflow (part 2 of 2): run it end to end once.", "97": "Wk 10 · Phase 5 · AI for EAs — Test and document (part 1 of 2): run the workflow and fix errors.", "98": "Wk 10 · Phase 5 · AI for EAs — Test and document (part 2 of 2): write the SOP.", "99": "Wk 10 · WEEKLY TEST — automate a weekly report reminder end to end. Output: working workflow + SOP. Pass mark 7/10. Type your score in the reflection box.", "100": "Wk 10 · SIMULATION (Section 13, compact 3-hour version) — travel-disruption day (flight cancelled at 6 am ET), then write the SOP for scheduling external meetings.", "101": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Portfolio, projects 1-3 (part 1 of 2): finalize projects 1-2 (calendar, inbox).", "102": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Portfolio, projects 1-3 (part 2 of 2): finalize project 3 (travel) with a one-page case study for each.", "103": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Portfolio, projects 4-6 (part 1 of 2): finalize projects 4-5 (meetings, weekly briefing).", "104": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Portfolio, projects 4-6 (part 2 of 2): finalize project 6 (project tracker) and publish your portfolio page.", "105": "Wk 11 · Phase 7 · Portfolio + Job Readiness — CV and LinkedIn (part 1 of 2): rewrite the CV with outcome-based bullets.", "106": "Wk 11 · Phase 7 · Portfolio + Job Readiness — CV and LinkedIn (part 2 of 2): write the LinkedIn headline, About and Featured section.", "107": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Interview stories (part 1 of 2): write STAR stories 1-4 (conflict, mistake, deadline, confidentiality).", "108": "Wk 11 · Phase 7 · Portfolio + Job Readiness — Interview stories (part 2 of 2): write STAR stories 5-8 (new tool, pushing back, anticipation, competing priorities).", "109": "Wk 11 · WEEKLY TEST — mock practical assessment (90 min, unseen scenario). Output: full deliverable set. Pass mark 7/10. Type your score in the reflection box.", "110": "Wk 11 · SIMULATION (Section 13, compact 3-hour version) — weekly-status automation (free-plan limit reached), board-meeting logistics (venue double-booked), 4-week executive report with conflicting numbers.", "111": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Applications tracker (part 1 of 2): build the tracker for 20 target companies.", "112": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Applications tracker (part 2 of 2): add titles, time-zone and work-authorization notes.", "113": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Tailored applications (part 1 of 2): tailor the CV and cover note for targets 1-3.", "114": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Tailored applications (part 2 of 2): tailor them for targets 4-5.", "115": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Outreach (part 1 of 2): write the 4-line recruiter and founder messages.", "116": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Outreach (part 2 of 2): send them and share your portfolio.", "117": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Interview rehearsal (part 1 of 2): answer questions 1-10 out loud with specific examples.", "118": "Wk 12 · Phase 7 · Portfolio + Job Readiness — Interview rehearsal (part 2 of 2): answer questions 11-20 out loud.", "119": "Wk 12 · WEEKLY TEST — mock interview + send one live application, then score yourself on the Section 16 checklist. Pass mark 7/10. Type your score in the reflection box.", "120": "Wk 12 · SIMULATION 1 of 2 (Section 13, compact 3-hour version) — two same-morning presentation requests (Day 27), then start the full-load simulation (Day 28): everything at once, two interruptions per hour.", "121": "Wk 12 · SIMULATION 2 of 2 (Section 13, compact 3-hour version) — finish the full-load simulation (Day 28), then the Day 30 self-assessment against the Section 16 checklist."};
+const EA_DAY_TPL = {"9": "ea3test", "10": "ea3sim", "19": "ea3test", "20": "ea3sim", "29": "ea3test", "30": "ea3sim", "39": "ea3test", "40": "ea3sim", "49": "ea3test", "50": "ea3sim", "59": "ea3test", "60": "ea3sim", "69": "ea3test", "70": "ea3sim", "79": "ea3test", "80": "ea3sim", "89": "ea3test", "90": "ea3sim", "99": "ea3test", "100": "ea3sim", "109": "ea3test", "110": "ea3sim", "119": "ea3test", "120": "ea3sim", "121": "ea3sim"};
+function installEAProject() {
+  try {
+    let list = loadCustomProjects();
+    // Old 5-hour add-on: remove if unused, otherwise keep its history under a clear name
+    const oi = list.findIndex(p => p.id === "ea-program");
+    if (oi >= 0) {
+      let used = false;
+      try { used = JSON.parse(localStorage.getItem(keySessions("ea-program")) || "[]").length > 0; } catch(e) {}
+      if (used) list[oi].name = "EA Program (old 5-hr version)"; else list.splice(oi, 1);
+    }
+    const proj = {
+      id: EA_ID, builtin: false,
+      name: "EA Program (3 hrs, 121 sessions)",
+      title: "⏱ EA Program",
+      subtitle: "Executive Assistant roadmap · Daniela Whitfield simulation",
+      maxDay: EA_SESSIONS, unitLabel: "Session", defaultMins: 180,
+      phaseTemplate: "ea3", dayTemplates: EA_DAY_TPL, goals: EA_GOALS
+    };
+    const ei = list.findIndex(p => p.id === EA_ID);
+    if (ei >= 0) list[ei] = proj;                       // refresh goals every load, history untouched
+    else if (!localStorage.getItem("eaInstalled_v2")) list.unshift(proj); // first install: directly under 90-Day
+    saveCustomProjects(list);
+    try { localStorage.setItem("eaInstalled_v2", "1"); } catch(e) {}
+  } catch(e) {}
+}
+function renderEAExtras() {
+  const on = getActiveProjectId() === EA_ID;
+  let el = $("eaProg");
+  if (!el) {
+    el = document.createElement("div"); el.id = "eaProg";
+    el.style.cssText = "display:none;margin-top:10px;font-size:12px;font-weight:600;color:var(--textmd);text-align:center;";
+    document.querySelector(".statsbar").insertAdjacentElement("afterend", el);
+  }
+  el.style.display = on ? "block" : "none";
+  const lab = document.querySelector("#noteArea label");
+  if (lab) {
+    if (!lab.dataset.def) lab.dataset.def = lab.textContent;
+    lab.textContent = on ? "Reflection + score (e.g. Score: 8/10 on test days)" : lab.dataset.def;
+  }
+  if (on) {
+    const mins = S.sessions.reduce((a, x) => a + x.mins, 0);
+    const done = new Set(S.sessions.map(x => x.day)).size;
+    el.textContent = "EA Program: " + (mins / 60).toFixed(1) + "h logged of ~" + EA_TARGET_H + "h · " + done + "/" + EA_SESSIONS + " sessions done";
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
 migrateLegacyData();
 installSeedProjects();
+installEAProject();
 loadProjectData();
 renderProjectSelect();
 renderProjectHeader();
@@ -1632,6 +1754,8 @@ renderProjectHeader();
   $("dayIn").value = Math.max(1, Math.min(activeProject().maxDay || 9999, suggested));
 })();
 
+renderLegend();
+if (activeProject().defaultMins && S.phaseIdx === -1) setDuration(activeProject().defaultMins);
 updateProgLabels();
 updateGoal();
 refreshClock();
